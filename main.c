@@ -9,7 +9,7 @@ int main(void)
     {
         BeginDrawing();
         ClearBackground(RAYWHITE);
-        DrawText("Yo!", 190, 200, 20, LIGHTGRAY);
+        DrawText("Never ever!", 190, 200, 20, LIGHTGRAY);
         EndDrawing();
     }
 
