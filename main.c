@@ -9,6 +9,8 @@ int main(void)
     {
         BeginDrawing();
         ClearBackground(RAYWHITE);
+        DrawText("Swaaaaaaaar!", 190, 200, 20, LIGHTGRAY);
+        DrawText("Yo check check", 190, 200, 20, LIGHTGRAY);
         DrawText("East or West,I am the best!", 190, 200, 20, LIGHTGRAY);
         EndDrawing();
     }
