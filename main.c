@@ -9,7 +9,7 @@ int main(void)
     {
         BeginDrawing();
         ClearBackground(RAYWHITE);
-        DrawText("Faah!", 190, 200, 20, LIGHTGRAY);
+        DrawText("Yo!", 190, 200, 20, LIGHTGRAY);
         EndDrawing();
     }
 
