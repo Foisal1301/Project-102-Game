@@ -2,25 +2,24 @@
 
 #define HEIGHT 600
 #define WIDTH 800
+
 int main(void)
 {
     InitWindow(WIDTH, HEIGHT, "Game");
     SetTargetFPS(60);
 
-    float ground = 3*HEIGHT/4;
-
+    Texture2D bg = LoadTexture("assets/bg.png");
     while (!WindowShouldClose())
     {
         BeginDrawing();
-        ClearBackground(RAYWHITE);
-        DrawText("Never ever!", 190, 200, 80, LIGHTGRAY);
+        // ClearBackground(RAYWHITE);
 
-        Rectangle groundRect = {0,ground,WIDTH,HEIGHT-ground};
-        DrawRectangleRec(groundRect,GetColor(0x014B43FF));
-        DrawRectangleLinesEx(groundRect,3,BLACK);
+        DrawTexture(bg,0,0,WHITE);
+        
         EndDrawing();
     }
 
+    UnloadTexture(bg);
     CloseWindow();
 
     return 0;
