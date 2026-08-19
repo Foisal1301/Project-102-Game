@@ -7,7 +7,6 @@
 #define BALLROWS 6
 #define BALLCOLS 14
 
-int pageIndex = 0;
 /*
 0 => Start
 1 => Resume
@@ -16,12 +15,24 @@ int pageIndex = 0;
 */
 int main(void)
 {
-    InitWindow(WIDTH, HEIGHT, "Game");
+    InitWindow(WIDTH, HEIGHT, "Bouncing Ball");
     SetTargetFPS(60);
-
+    int pageIndex = 3;
+    int score = 0;
     // Menu Page
     int selectedOption = 0;
     int exit = 0;
+
+    // GamePlay
+    Texture2D shooters[3];
+    for(int i=1;i<=3;i++){
+        char path[50];
+        sprintf(path,"assets/shooter_%d.png",i);
+        shooters[i-1] = LoadTexture(path);
+    }
+    int shooterIndex = 0;
+    Vector2 ballSpeed = {0,0};
+
 
     Texture2D bg = LoadTexture("assets/bg.png");
     while (!WindowShouldClose() && !exit)
@@ -31,7 +42,6 @@ int main(void)
         switch (pageIndex)
         {
         case 0: // Menu
-
             if (selectedOption == 0)
             {
                 DrawText("New Game", GetScreenWidth() / 2 - MeasureText("New Game", 60) / 2, 200, 60, TEXTCOLOR); // Hover effect
@@ -92,10 +102,9 @@ int main(void)
             }
 
             break;
-        case 1: // Resume
-            DrawText("Resume", GetScreenWidth() / 2 - MeasureText("Resume", 60) / 2, 200, 60, TEXTCOLOR);
+        
+        case 1: // Resume page
             break;
-
         case 2: // About
             if (IsKeyPressed(KEY_LEFT))
             {
@@ -121,6 +130,12 @@ int main(void)
                 {
                 }
             }
+
+            // shooter
+            
+            char scores[30];
+            sprintf(scores,"SCORE : %d",score);
+            DrawText(scores, 10 , 10, 30, TEXTCOLOR);
             break;
         }
 
@@ -128,6 +143,9 @@ int main(void)
     }
 
     UnloadTexture(bg);
+    for(int i=0;i<3;i++){
+        UnloadTexture(shooters[i]);
+    }
     CloseWindow();
 
     return 0;
