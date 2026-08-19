@@ -1,21 +1,129 @@
 #include "raylib.h"
+#include <stdio.h>
 
 #define HEIGHT 600
 #define WIDTH 800
+#define TEXTCOLOR BLACK
+#define BALLROWS 6
+#define BALLCOLS 14
 
+int pageIndex = 0;
+/*
+0 => Start
+1 => Resume
+2 => About
+3 =>GamePlay
+*/
 int main(void)
 {
     InitWindow(WIDTH, HEIGHT, "Game");
     SetTargetFPS(60);
 
+    // Menu Page
+    int selectedOption = 0;
+    int exit = 0;
+
     Texture2D bg = LoadTexture("assets/bg.png");
-    while (!WindowShouldClose())
+    while (!WindowShouldClose() && !exit)
     {
         BeginDrawing();
-        // ClearBackground(RAYWHITE);
+        DrawTexture(bg, 0, 0, WHITE);
+        switch (pageIndex)
+        {
+        case 0: // Menu
 
-        DrawTexture(bg,0,0,WHITE);
-        
+            if (selectedOption == 0)
+            {
+                DrawText("New Game", GetScreenWidth() / 2 - MeasureText("New Game", 60) / 2, 200, 60, TEXTCOLOR); // Hover effect
+            }
+            else
+            {
+                DrawText("New Game", GetScreenWidth() / 2 - MeasureText("New Game", 40) / 2, 200, 40, TEXTCOLOR);
+            }
+
+            if (selectedOption == 1)
+            {
+                DrawText("About", GetScreenWidth() / 2 - MeasureText("About", 60) / 2, 280, 60, TEXTCOLOR); // Hover effect
+            }
+            else
+            {
+                DrawText("About", GetScreenWidth() / 2 - MeasureText("About", 40) / 2, 280, 40, TEXTCOLOR);
+            }
+
+            if (selectedOption == 2)
+            {
+                DrawText("Exit", GetScreenWidth() / 2 - MeasureText("Exit", 60) / 2, 360, 60, TEXTCOLOR); // Hover effect
+            }
+            else
+            {
+                DrawText("Exit", GetScreenWidth() / 2 - MeasureText("Exit", 40) / 2, 360, 40, TEXTCOLOR);
+            }
+
+            if (IsKeyPressed(KEY_UP))
+            {
+
+                if (selectedOption > 0)
+                    selectedOption--;
+            }
+            if (IsKeyPressed(KEY_DOWN))
+            {
+
+                if (selectedOption < 2)
+                    selectedOption++;
+            }
+
+            // Page Shifting
+            if (IsKeyPressed(KEY_ENTER))
+            {
+                switch (selectedOption)
+                {
+                case 0:
+                    pageIndex = 3;
+                    break;
+
+                case 1:
+                    pageIndex = 2;
+                    break;
+
+                case 2:
+                    exit = 1;
+                    break;
+                }
+            }
+
+            break;
+        case 1: // Resume
+            DrawText("Resume", GetScreenWidth() / 2 - MeasureText("Resume", 60) / 2, 200, 60, TEXTCOLOR);
+            break;
+
+        case 2: // About
+            if (IsKeyPressed(KEY_LEFT))
+            {
+                pageIndex = 0;
+            }
+            DrawText("About", GetScreenWidth() / 2 - MeasureText("About", 60) / 2, 10, 60, TEXTCOLOR);
+            DrawText("Go Back", 10 , 10, 30, TEXTCOLOR);
+            break;
+
+        case 3: // GamePlay
+
+            // loding ball images
+            for (int i = 0; i < 2; i++)
+            {
+                char path[50];
+                sprintf(path, "assets/ball_%d_small_alt.png", i + 1);
+            }
+
+            int balls[BALLROWS][BALLCOLS];
+            for (int i = 0; i < BALLROWS; i++)
+            {
+                for (int j = 0; j < BALLCOLS; j++)
+                {
+                }
+            }
+            break;
+        }
+
         EndDrawing();
     }
 
