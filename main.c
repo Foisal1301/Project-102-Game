@@ -1,4 +1,5 @@
 #include "raylib.h"
+#include "raymath.h"
 #include <stdio.h>
 
 #define HEIGHT 600
@@ -8,6 +9,7 @@
 #define BALLCOLS 14
 
 /*
+Pages
 0 => Start
 1 => Resume
 2 => About
@@ -30,9 +32,7 @@ int main(void)
         sprintf(path,"assets/shooter_%d.png",i);
         shooters[i-1] = LoadTexture(path);
     }
-    int shooterIndex = 0;
-    Vector2 ballSpeed = {0,0};
-
+    int shooterIndex = GetRandomValue(0,2);
 
     Texture2D bg = LoadTexture("assets/bg.png");
     while (!WindowShouldClose() && !exit)
@@ -132,13 +132,27 @@ int main(void)
             }
 
             // shooter
-            
+            DrawTexturePro(
+                shooters[shooterIndex],
+                (Rectangle){0,0,shooters[shooterIndex].width,shooters[shooterIndex].height},
+                (Rectangle){
+                    WIDTH / 2 - 40,
+                    HEIGHT - 130,
+                    80,
+                    120
+                },
+                Vector2Zero(),0,WHITE
+            );
+            if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
+                Vector2 pos = GetMousePosition();
+                printf("%f %f\n",pos.x,pos.y);
+            }
+            // score
             char scores[30];
             sprintf(scores,"SCORE : %d",score);
             DrawText(scores, 10 , 10, 30, TEXTCOLOR);
             break;
         }
-
         EndDrawing();
     }
 
