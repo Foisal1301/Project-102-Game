@@ -2,6 +2,7 @@
 #include "raymath.h"
 #include <stdio.h>
 
+#define DEBUG 1
 #define HEIGHT 600
 #define WIDTH 800
 #define TEXTCOLOR BLACK
@@ -19,13 +20,15 @@ int main(void)
 {
     InitWindow(WIDTH, HEIGHT, "Bouncing Ball");
     SetTargetFPS(60);
-    int pageIndex = 3;
+    int pageIndex = DEBUG ? 3 : 1;
     int score = 0;
     // Menu Page
     int selectedOption = 0;
     int exit = 0;
 
     // GamePlay
+    Vector2 cannonPos = {WIDTH / 2 - 40,HEIGHT - 130};
+    float cannonAngle = 0;
     Texture2D shooters[3];
     for(int i=1;i<=3;i++){
         char path[50];
@@ -115,7 +118,10 @@ int main(void)
             break;
 
         case 3: // GamePlay
-
+            if (IsKeyPressed(KEY_LEFT))
+            {
+                pageIndex = 1;
+            }
             // loding ball images
             for (int i = 0; i < 2; i++)
             {
@@ -132,20 +138,23 @@ int main(void)
             }
 
             // shooter
+            Vector2 mousePos = GetMousePosition();
+            float dx = mousePos.x - cannonPos.x;
+            float dy = mousePos.y - cannonPos.y;
+            cannonAngle = atan2f(dy,dx) * RAD2DEG;
             DrawTexturePro(
                 shooters[shooterIndex],
                 (Rectangle){0,0,shooters[shooterIndex].width,shooters[shooterIndex].height},
                 (Rectangle){
-                    WIDTH / 2 - 40,
-                    HEIGHT - 130,
+                    cannonPos.x+50,//WIDTH / 2 - 40,
+                    cannonPos.y+100,//HEIGHT - 130,
                     80,
                     120
                 },
-                Vector2Zero(),0,WHITE
+                (Vector2){40,120} ,cannonAngle+90,WHITE
             );
             if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
-                Vector2 pos = GetMousePosition();
-                printf("%f %f\n",pos.x,pos.y);
+                printf("%f %f\n",mousePos.x,mousePos.y);
             }
             // score
             char scores[30];
