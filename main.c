@@ -1,13 +1,22 @@
 #include "raylib.h"
 #include "raymath.h"
 #include <stdio.h>
+#include <stdlib.h>
+#include <time.h>
 
 #define DEBUG 1
 #define HEIGHT 600
 #define WIDTH 800
 #define TEXTCOLOR BLACK
-#define BALLROWS 6
+#define BALLROWS 16
 #define BALLCOLS 14
+#define BALLNUM 2
+#define BALLRADIUS ((WIDTH - 12) / (2 * BALLCOLS + 0.5))
+
+struct ball
+{
+    Vector2 s,v,a;
+};
 
 /*
 Pages
@@ -16,18 +25,51 @@ Pages
 2 => About
 3 =>GamePlay
 */
+int randBalls(int ballNumber) // Swapno
+{
+
+    srand(time(NULL));
+    int x;
+    x = rand() % ballNumber + 1;
+    return x;
+}
+
 int main(void)
 {
     InitWindow(WIDTH, HEIGHT, "Bouncing Ball");
     SetTargetFPS(60);
-    int pageIndex = DEBUG ? 3 : 1;
+    int pageIndex = DEBUG ? 3 : 0;
     int score = 0;
+
+    // Global
+    Texture2D bg = LoadTexture("assets/bg.png");
+
     // Menu Page
     int selectedOption = 0;
     int exit = 0;
 
     // GamePlay
+    // Grid // Swapno
+    int randBallIdx[6][BALLCOLS];
+    for (int i = 0; i < 6; i++)
+    {
+        for (int j = 0; j < BALLCOLS; j++)
+        {
+            randBallIdx[i][j] = rand() % 2;
+        }
+    }
+    Texture2D balls[BALLNUM];
+
+    for (int i = 0; i < BALLNUM; i++)
+    {
+        char path[50];
+        sprintf(path, "assets/ball_%d.png", i + 1);
+        balls[i] = LoadTexture(path);
+    }
+
+    // Shooter
     Vector2 cannonPos = {WIDTH / 2 - 40,HEIGHT - 130};
+    Vector2 cannonOrigin = {40,120};
     float cannonAngle = 0;
     Texture2D shooters[3];
     for(int i=1;i<=3;i++){
@@ -37,9 +79,9 @@ int main(void)
     }
     int shooterIndex = GetRandomValue(0,2);
 
-    Texture2D bg = LoadTexture("assets/bg.png");
     while (!WindowShouldClose() && !exit)
     {
+        int ballXadd = 0, ballYadd = 0;
         BeginDrawing();
         DrawTexture(bg, 0, 0, WHITE);
         switch (pageIndex)
@@ -74,7 +116,6 @@ int main(void)
 
             if (IsKeyPressed(KEY_UP))
             {
-
                 if (selectedOption > 0)
                     selectedOption--;
             }
@@ -122,18 +163,32 @@ int main(void)
             {
                 pageIndex = 1;
             }
-            // loding ball images
-            for (int i = 0; i < 2; i++)
-            {
-                char path[50];
-                sprintf(path, "assets/ball_%d_small_alt.png", i + 1);
-            }
+            // drawing ball images //Swapno
 
-            int balls[BALLROWS][BALLCOLS];
-            for (int i = 0; i < BALLROWS; i++)
+            for (int i = 0; i < 6; i++)
             {
                 for (int j = 0; j < BALLCOLS; j++)
                 {
+                    if ((i % 2) == 0)
+                    {
+                        ballXadd = BALLRADIUS;
+                    }
+                    else
+                    {
+                        ballXadd = 0;
+                    }
+
+                    /*if (i == 0)
+                    {
+                        ballYadd = BALLRADIUS;
+                    }else{
+                        ballYadd = 0;
+                    }*/
+
+                    DrawTexturePro(balls[randBallIdx[i][j]],
+                                    (Rectangle){0, 0, balls[randBallIdx[i][j]].width, balls[randBallIdx[i][j]].height},
+                                    (Rectangle){j * BALLRADIUS * 2 + ballXadd, i * (BALLRADIUS * 1.735), BALLRADIUS * 2, BALLRADIUS * 2},
+                                    Vector2Zero(), 0, WHITE);
                 }
             }
 
@@ -141,7 +196,10 @@ int main(void)
             Vector2 mousePos = GetMousePosition();
             float dx = mousePos.x - cannonPos.x;
             float dy = mousePos.y - cannonPos.y;
-            cannonAngle = atan2f(dy,dx) * RAD2DEG;
+            float tempAngle = (atan2f(dy,dx) * RAD2DEG)+90;
+            if(tempAngle<=70 && tempAngle>=-65){
+                cannonAngle = tempAngle;
+            }
             DrawTexturePro(
                 shooters[shooterIndex],
                 (Rectangle){0,0,shooters[shooterIndex].width,shooters[shooterIndex].height},
@@ -151,11 +209,12 @@ int main(void)
                     80,
                     120
                 },
-                (Vector2){40,120} ,cannonAngle+90,WHITE
+                cannonOrigin ,cannonAngle,WHITE
             );
-            if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
-                printf("%f %f\n",mousePos.x,mousePos.y);
+            if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT) || IsKeyPressed(KEY_SPACE)) {
+                printf("Shoot!\n");
             }
+
             // score
             char scores[30];
             sprintf(scores,"SCORE : %d",score);
@@ -168,6 +227,10 @@ int main(void)
     UnloadTexture(bg);
     for(int i=0;i<3;i++){
         UnloadTexture(shooters[i]);
+    }
+    for (int i = 0; i < BALLNUM; i++) // Swapno
+    {
+        UnloadTexture(balls[i]);
     }
     CloseWindow();
 
