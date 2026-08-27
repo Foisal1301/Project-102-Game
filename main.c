@@ -1,8 +1,7 @@
 #include "raylib.h"
 #include "raymath.h"
 #include <stdio.h>
-#include <stdlib.h>
-#include <time.h>
+
 
 #define DEBUG 1
 #define HEIGHT 600
@@ -13,11 +12,6 @@
 #define BALLNUM 2
 #define BALLRADIUS ((WIDTH - 12) / (2 * BALLCOLS + 0.5))
 
-struct ball
-{
-    Vector2 s,v,a;
-};
-
 /*
 Pages
 0 => Start
@@ -25,14 +19,15 @@ Pages
 2 => About
 3 =>GamePlay
 */
-int randBalls(int ballNumber) // Swapno
-{
 
-    srand(time(NULL));
-    int x;
-    x = rand() % ballNumber + 1;
-    return x;
-}
+// int randBalls(int ballNumber) // Swapno
+// {
+
+//     srand(time(NULL));
+//     int x;
+//     x = rand() % ballNumber + 1;
+//     return x;
+// }
 
 int main(void)
 {
@@ -55,7 +50,7 @@ int main(void)
     {
         for (int j = 0; j < BALLCOLS; j++)
         {
-            randBallIdx[i][j] = rand() % 2;
+            randBallIdx[i][j] = GetRandomValue(0,1);//rand() % 2;
         }
     }
     Texture2D balls[BALLNUM];
@@ -68,6 +63,7 @@ int main(void)
     }
 
     // Shooter
+    // bool shooted = false;
     Vector2 cannonPos = {WIDTH / 2 - 40,HEIGHT - 130};
     Vector2 cannonOrigin = {40,120};
     float cannonAngle = 0;
@@ -77,7 +73,13 @@ int main(void)
         sprintf(path,"assets/shooter_%d.png",i);
         shooters[i-1] = LoadTexture(path);
     }
-    int shooterIndex = GetRandomValue(0,2);
+    int shooterIndex = GetRandomValue(0,1);
+
+    // char path[50];
+    // sprintf(path,"assets/shooter_%d.png",shooterIndex+1);
+    // Texture2D bullet = LoadTexture(path);
+    // Vector2 bulletPosition = {0,0};
+    // Vector2 bulletVelocity = {0,0};
 
     while (!WindowShouldClose() && !exit)
     {
@@ -211,9 +213,43 @@ int main(void)
                 },
                 cannonOrigin ,cannonAngle,WHITE
             );
-            if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT) || IsKeyPressed(KEY_SPACE)) {
-                printf("Shoot!\n");
-            }
+            shooterIndex = GetRandomValue(0,1);
+            // if (IsKeyPressed(KEY_SPACE)) {
+            //     if(!shooted){
+            //         shooted=true;
+            //         bulletPosition.x = cannonPos.x;
+            //         bulletPosition.y = cannonPos.y;
+            //         bulletVelocity.x = -5;
+            //         bulletVelocity.y = -5;
+            //         // printf("%f %f\n",GetMousePosition().x,GetMousePosition().y);
+            //     }
+            // }
+
+            // if(shooted){
+            //     bulletPosition.x += bulletVelocity.x;
+            //     bulletPosition.y += bulletVelocity.y;
+            //     if(bulletPosition.x<0){
+            //         bulletPosition.x = 0;
+            //         bulletVelocity.x = -bulletVelocity.x;
+            //     }
+            //     if(bulletPosition.y<0){
+            //         bulletPosition.y = 0;
+            //         bulletVelocity.x = 0;
+            //         bulletVelocity.y = 0;
+            //         shooted = false;
+            //     }
+            //     if(bulletPosition.x>800){
+            //         bulletPosition.x = 800;
+            //         bulletVelocity.x = -bulletVelocity.x;
+            //     }
+                
+            //     DrawTexturePro(
+            //         bullet,
+            //         (Rectangle){0,0,bullet.width,bullet.height},
+            //         (Rectangle){bulletPosition.x,bulletPosition.y,BALLRADIUS * 2, BALLRADIUS * 2},
+            //         Vector2Zero(),0,WHITE
+            //     );
+            // }
 
             // score
             char scores[30];
