@@ -202,8 +202,9 @@ int main(void)
             float dx = mousePos.x - cannonBase.x;
             float dy = mousePos.y - cannonBase.y;
             float tempAngle = (atan2f(dy,dx) * RAD2DEG);
-            // if(tempAngle<=70 && tempAngle>=-65)
+            if(tempAngle<=-35 && tempAngle>=-145)
                 cannonAngle = tempAngle;
+            
             DrawTexturePro(
                 shooters[shooterIndex],
                 (Rectangle){0,0,shooters[shooterIndex].width,shooters[shooterIndex].height},
@@ -218,14 +219,11 @@ int main(void)
             if (IsKeyPressed(KEY_SPACE)) {
                 if(!shooted){
                     shooted=true;
-                    bulletPosition.x = cannonBase.x;
-                    bulletPosition.y = cannonBase.y;
-                    printf("%f\n",cannonAngle);
-                    bulletVelocity.x = 20*cos(cannonAngle);
-                    bulletVelocity.y = 20*sin(cannonAngle);
-                    printf("%f\n",sin(3.1416/2));
+                    bulletPosition.x = cannonBase.x + 120*cos(cannonAngle*DEG2RAD);
+                    bulletPosition.y = cannonBase.y + 120*sin(cannonAngle*DEG2RAD);
+                    bulletVelocity.x = 20*cos(cannonAngle*DEG2RAD);
+                    bulletVelocity.y = 20*sin(cannonAngle*DEG2RAD);
                     if(bulletVelocity.y>0) bulletVelocity.y = -bulletVelocity.y;
-                   printf("%f %f\n",GetMousePosition().x,GetMousePosition().y);
                 }
             }
 
@@ -235,7 +233,7 @@ int main(void)
                 if(bulletPosition.x<0){
                     bulletPosition.x = 0;
                     bulletVelocity.x = -bulletVelocity.x;
-                }else if(bulletPosition.x>WIDTH){
+                }else if(bulletPosition.x>=WIDTH){
                     bulletPosition.x = WIDTH;
                     bulletVelocity.x = -bulletVelocity.x;
                 }
