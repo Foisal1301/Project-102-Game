@@ -6,10 +6,10 @@
 #define DEBUG 0
 #define HEIGHT 600
 #define WIDTH 800
-#define TEXTCOLOR BLACK
+#define TEXTCOLOR RAYWHITE
 #define BALLROWS 16
 #define BALLCOLS 14
-#define BALLNUM 2
+#define BALLNUM 3
 #define BALLRADIUS ((WIDTH - 12) / (2 * BALLCOLS + 0.5))
 #define CANNON_HEIGHT 120
 #define CANNON_WIDTH 80
@@ -26,20 +26,12 @@ Pages
 3 =>GamePlay
 */
 
-// int randBalls(int ballNumber) // Swapno
-// {
-
-//     srand(time(NULL));
-//     int x;
-//     x = rand() % ballNumber + 1;
-//     return x;
-// }
 
 int main(void)
 {
     InitWindow(WIDTH, HEIGHT, "Bouncing Ball");
     SetTargetFPS(60);
-    int pageIndex = 0;
+    int pageIndex = DEBUG ? 3 : 0;
     int score = 0;
 
     // Global
@@ -51,14 +43,39 @@ int main(void)
 
     // GamePlay
     // Grid // Swapno
-    int randBallIdx[6][BALLCOLS];
+    int ballIndex = 0;
+    Rectangle existedBalls[BALLROWS * BALLCOLS];
+    for (int i = 0; i < BALLROWS * BALLCOLS; i++)
+    {
+        existedBalls[i] = (Rectangle){0, 0, 0, 0};
+    }
+    int randBallIdx[BALLROWS * BALLCOLS];
+    int ballXadd = 0, ballYadd = 0;
     for (int i = 0; i < 6; i++)
     {
         for (int j = 0; j < BALLCOLS; j++)
         {
-            randBallIdx[i][j] = GetRandomValue(0,1);//rand() % 2;
+            if ((i % 2) == 0)
+            {
+                ballXadd = BALLRADIUS;
+            }
+            else
+            {
+                ballXadd = 0;
+            }
+
+            existedBalls[i * BALLCOLS + j] = (Rectangle){
+                j * BALLRADIUS * 2 + ballXadd,
+                i * (BALLRADIUS * 1.735),
+                BALLRADIUS * 2,
+                BALLRADIUS * 2};
+
+            randBallIdx[i * BALLCOLS + j] = GetRandomValue(0, 1);
+
+            ballIndex++;
         }
     }
+
     Texture2D balls[BALLNUM];
 
     for (int i = 0; i < BALLNUM; i++)
@@ -73,26 +90,18 @@ int main(void)
     Vector2 cannonBase = {WIDTH / 2.0f,HEIGHT * 0.95f};
     Vector2 cannonOrigin = {CANNON_WIDTH/2,CANNON_HEIGHT};
     float cannonAngle = 0;
-    Texture2D shooters[3];
-    for(int i=1;i<=3;i++){
+    Texture2D shooters[BALLNUM];
+    for(int i=0;i<BALLNUM;i++){
         char path[50];
-        sprintf(path,"assets/shooter_%d.png",i);
-        shooters[i-1] = LoadTexture(path);
+        sprintf(path,"assets/shooter_%d.png",i+1);
+        shooters[i] = LoadTexture(path);
     }
-    int shooterIndex = GetRandomValue(0,1);
-
-    Texture2D bullets[2];
-    for(int i=1;i<=2;i++){
-        char path[50];
-        sprintf(path,"assets/ball_%d.png",i);
-        bullets[i-1] = LoadTexture(path);
-    }
+    int shooterIndex = GetRandomValue(0,BALLNUM-1);
     Vector2 bulletPosition = {0,0};
     Vector2 bulletVelocity = {0,0};
 
     while (!WindowShouldClose() && !exit)
     {
-        int ballXadd = 0, ballYadd = 0;
         BeginDrawing();
         DrawTexture(bg, 0, 0, WHITE);
         switch (pageIndex)
@@ -176,31 +185,12 @@ int main(void)
             }
             // drawing ball images //Swapno
 
-            for (int i = 0; i < 6; i++)
+            for (int i = 0; i < ballIndex; i++)
             {
-                for (int j = 0; j < BALLCOLS; j++)
-                {
-                    if ((i % 2) == 0)
-                    {
-                        ballXadd = BALLRADIUS;
-                    }
-                    else
-                    {
-                        ballXadd = 0;
-                    }
-
-                    /*if (i == 0)
-                    {
-                        ballYadd = BALLRADIUS;
-                    }else{
-                        ballYadd = 0;
-                    }*/
-
-                    DrawTexturePro(balls[randBallIdx[i][j]],
-                                    (Rectangle){0, 0, balls[randBallIdx[i][j]].width, balls[randBallIdx[i][j]].height},
-                                    (Rectangle){j * BALLRADIUS * 2 + ballXadd, i * (BALLRADIUS * 1.735), BALLRADIUS * 2, BALLRADIUS * 2},
-                                    Vector2Zero(), 0, WHITE);
-                }
+                DrawTexturePro(balls[randBallIdx[i]],
+                               (Rectangle){0, 0, balls[randBallIdx[i]].width, balls[randBallIdx[i]].height},
+                               existedBalls[i],
+                               Vector2Zero(), 0, WHITE);
             }
 
             // shooter
@@ -234,6 +224,7 @@ int main(void)
             }
 
             if(shooted){
+                Rectangle shootedBall = (Rectangle){bulletPosition.x, bulletPosition.y, BALLRADIUS * 2, BALLRADIUS * 2};
                 bulletPosition.x += bulletVelocity.x;
                 bulletPosition.y += bulletVelocity.y;
                 if(bulletPosition.x<0){
@@ -247,17 +238,55 @@ int main(void)
                     bulletPosition.y = 0;
                     bulletVelocity.x = 0;
                     bulletVelocity.y = 0;
-                    shooterIndex = GetRandomValue(0,1);
+                    shooterIndex = GetRandomValue(0,BALLNUM-1);
                     shooted = false;
                 }
                 if(bulletPosition.x>800){
                     bulletPosition.x = 800;
                     bulletVelocity.x = -bulletVelocity.x;
                 }
+
+                bool isCollision = false;
+
+                for (int i = 0; i < ballIndex && !isCollision; i++)
+                {
+                    if (CheckCollisionRecs(shootedBall, existedBalls[i]))
+                    {
+                        isCollision = true;
+
+                        float newX;
+
+                        if (bulletVelocity.x < 0)
+                        {
+                            newX = existedBalls[i].x + BALLRADIUS;
+                        }
+                        else
+                        {
+                            newX = existedBalls[i].x - BALLRADIUS;
+                        }
+
+                        existedBalls[ballIndex] = (Rectangle){
+                            newX,
+                            existedBalls[i].y + 1.73 * BALLRADIUS,
+                            BALLRADIUS * 2,
+                            BALLRADIUS * 2};
+
+                        randBallIdx[ballIndex] = shooterIndex;
+
+                        ballIndex++;
+
+                        bulletVelocity.x = 0;
+                        bulletVelocity.y = 0;
+
+                        shooted = false;
+                        shooterIndex = GetRandomValue(0, BALLNUM-1);  
+                    }
+                }
+                
                 
                 DrawTexturePro(
-                    bullets[shooterIndex],
-                    (Rectangle){0,0,bullets[shooterIndex].width,bullets[shooterIndex].height},
+                    balls[shooterIndex],
+                    (Rectangle){0,0,balls[shooterIndex].width,balls[shooterIndex].height},
                     (Rectangle){bulletPosition.x,bulletPosition.y,BALLRADIUS * 2, BALLRADIUS * 2},
                     Vector2Zero(),0,WHITE
                 );
@@ -266,18 +295,15 @@ int main(void)
             // score
             char scores[30];
             sprintf(scores,"SCORE : %d",score);
-            DrawText(scores, 10 , 10, 30, TEXTCOLOR);
+            DrawText(scores, 10 , HEIGHT-MeasureTextEx(GetFontDefault(),scores,FONTSIZE,FONTSIZE/10).y, FONTSIZE, TEXTCOLOR);
             break;
         }
         EndDrawing();
     }
 
     UnloadTexture(bg);
-    for(int i=0;i<3;i++){
+    for(int i=0;i<BALLNUM;i++){
         UnloadTexture(shooters[i]);
-    }
-    for (int i = 0; i < BALLNUM; i++) // Swapno
-    {
         UnloadTexture(balls[i]);
     }
     CloseWindow();
