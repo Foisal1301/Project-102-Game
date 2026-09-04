@@ -3,7 +3,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#define DEBUG 0
+#define DEBUG 1
 #define HEIGHT 600
 #define WIDTH 800
 #define TEXTCOLOR RAYWHITE
@@ -25,7 +25,6 @@ Pages
 2 => About
 3 =>GamePlay
 */
-
 
 int main(void)
 {
@@ -70,7 +69,7 @@ int main(void)
                 BALLRADIUS * 2,
                 BALLRADIUS * 2};
 
-            randBallIdx[i * BALLCOLS + j] = GetRandomValue(0, 1);
+            randBallIdx[i * BALLCOLS + j] = GetRandomValue(0, BALLNUM-1);
 
             ballIndex++;
         }
