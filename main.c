@@ -261,13 +261,10 @@ int main(void)
             DrawText("CONTROLS", GetScreenWidth() / 2 - MeasureText("CONTROLS", 30) / 2, 200+4*LINEGAPFORTEXT*0.5, 30, TEXTCOLOR);
             DrawText("SPACE/MOUSE-LEFT: SHOOT", 10 , 200+6*LINEGAPFORTEXT*0.5, 30, TEXTCOLOR);
             DrawText("LEFT ARROW: RESUME GAME", 10 , 200+7*LINEGAPFORTEXT*0.5, 30, TEXTCOLOR);
-            
-            // DrawText("Language: C", 10 , 80, 30, BLACK);
-            // DrawText("Game Library: Raylib", 10 , 80+LINEGAPFORTEXT*0.5, 30, BLACK);
-            // DrawText("Developers: Md. Foisal and Shahariar Sajid Swapno", 10 , 80+2*LINEGAPFORTEXT*0.5, 30, BLACK);
             break;
 
         case 3: // GamePlay
+            DrawRectangle(0,0, WIDTH, HEIGHT, Fade(BLACK, 0.7f));
             if(removedBalls==ballIndex){
                 pageIndex=4;
                 
