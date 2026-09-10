@@ -24,6 +24,7 @@ Pages
 2 => About
 3 => GamePlay
 4 => GameOver
+MAXY = 450
 */
 Rectangle existedBalls[BALLROWS * BALLCOLS];
 int randBallIdx[BALLROWS * BALLCOLS];
@@ -31,15 +32,20 @@ int ballXadd = 0, ballYadd = 0;
 int ballIndex = 0;
 int removedBalls=0;
 int score = 0;
+float timeRemaining = 90;
 bool shooted;
 void NewGame(){
+    timeRemaining = 90;
     removedBalls=0;
     score = 0;
     shooted=false;
+    ballIndex=0;
+
     for (int i = 0; i < BALLROWS * BALLCOLS; i++)
     {
         existedBalls[i] = (Rectangle){0, 0, 0, 0};
     }
+
     for (int i = 0; i < 6; i++)
     {
         for (int j = 0; j < BALLCOLS; j++)
@@ -60,6 +66,7 @@ void NewGame(){
                 BALLRADIUS * 2};
 
             randBallIdx[i * BALLCOLS + j] = GetRandomValue(0, 2);
+            ballIndex++;
         }
     }
 }
@@ -78,41 +85,42 @@ int main(void)
     int selectedOption = 0;
     int exit = 0;
 
+    NewGame();
     // GamePlay
     // Grid // Swapno
     // int ballIndex = 0;
     
     // Rectangle existedBalls[BALLROWS * BALLCOLS];
-    for (int i = 0; i < BALLROWS * BALLCOLS; i++)
-    {
-        existedBalls[i] = (Rectangle){0, 0, 0, 0};
-    }
+    // for (int i = 0; i < BALLROWS * BALLCOLS; i++)
+    // {
+    //     existedBalls[i] = (Rectangle){0, 0, 0, 0};
+    // }
     // int randBallIdx[BALLROWS * BALLCOLS];
     // int ballXadd = 0, ballYadd = 0;
-    for (int i = 0; i < 6; i++)
-    {
-        for (int j = 0; j < BALLCOLS; j++)
-        {
-            if ((i % 2) == 0)
-            {
-                ballXadd = BALLRADIUS;
-            }
-            else
-            {
-                ballXadd = 0;
-            }
+    // for (int i = 0; i < 6; i++)
+    // {
+    //     for (int j = 0; j < BALLCOLS; j++)
+    //     {
+    //         if ((i % 2) == 0)
+    //         {
+    //             ballXadd = BALLRADIUS;
+    //         }
+    //         else
+    //         {
+    //             ballXadd = 0;
+    //         }
 
-            existedBalls[i * BALLCOLS + j] = (Rectangle){
-                j * BALLRADIUS * 2 + ballXadd,
-                i * (BALLRADIUS * 1.735),
-                BALLRADIUS * 2,
-                BALLRADIUS * 2};
+    //         existedBalls[i * BALLCOLS + j] = (Rectangle){
+    //             j * BALLRADIUS * 2 + ballXadd,
+    //             i * (BALLRADIUS * 1.735),
+    //             BALLRADIUS * 2,
+    //             BALLRADIUS * 2};
 
-            randBallIdx[i * BALLCOLS + j] = GetRandomValue(0, 2);
+    //         randBallIdx[i * BALLCOLS + j] = GetRandomValue(0, 2);
 
-            ballIndex++;
-        }
-    }
+    //         ballIndex++;
+    //     }
+    // }
 
     Texture2D balls[BALLNUM];
 
@@ -122,9 +130,9 @@ int main(void)
         sprintf(path, "assets/ball_%d.png", i + 1);
         balls[i] = LoadTexture(path);
     }
+    balls[BALLNUM] = LoadTexture("assets/ball_t.png");
 
     // Shooter
-    shooted = false;
     Vector2 cannonBase = {WIDTH / 2.0f,HEIGHT * 0.95f};
     Vector2 cannonOrigin = {CANNON_WIDTH/2,CANNON_HEIGHT};
     float cannonAngle = 0;
@@ -135,6 +143,7 @@ int main(void)
         shooters[i] = LoadTexture(path);
     }
     int shooterIndex = GetRandomValue(0,BALLNUM-1);
+    int shooterIndex2 = GetRandomValue(0,BALLNUM-1);
     Vector2 bulletPosition = {0,0};
     Vector2 bulletVelocity = {0,0};
 
@@ -229,21 +238,29 @@ int main(void)
             }
 
             if(selected2==2){
-                DrawText("Exit",WIDTH/2 - MeasureText("Exit",HOVER_FONTSIZE)/2,200+2*LINEGAPFORTEXT,HOVER_FONTSIZE,TEXTCOLOR);
+                DrawText("Main Menu",WIDTH/2 - MeasureText("Main Menu",HOVER_FONTSIZE)/2,200+2*LINEGAPFORTEXT,HOVER_FONTSIZE,TEXTCOLOR);
             }else{
-                DrawText("Exit",WIDTH/2 - MeasureText("Exit",FONTSIZE)/2,200+2*LINEGAPFORTEXT,FONTSIZE,TEXTCOLOR);
+                DrawText("Main Menu",WIDTH/2 - MeasureText("Main Menu",FONTSIZE)/2,200+2*LINEGAPFORTEXT,FONTSIZE,TEXTCOLOR);
+            }
+
+            if(selected2==3){
+                DrawText("Exit",WIDTH/2 - MeasureText("Exit",HOVER_FONTSIZE)/2,200+3*LINEGAPFORTEXT,HOVER_FONTSIZE,TEXTCOLOR);
+            }else{
+                DrawText("Exit",WIDTH/2 - MeasureText("Exit",FONTSIZE)/2,200+3*LINEGAPFORTEXT,FONTSIZE,TEXTCOLOR);
             }
 
             if (IsKeyPressed(KEY_UP) && selected2>0) selected2--;
-            if (IsKeyPressed(KEY_DOWN) && selected2<2) selected2++;
+            if (IsKeyPressed(KEY_DOWN) && selected2<3) selected2++;
             
             if (IsKeyPressed(KEY_ENTER)){
                 if(selected2==0) pageIndex = 3;
                 else if(selected2==1){
                     NewGame();
                     pageIndex=3;
-                }
-                else exit = true;
+                }else if(selected2==2){
+                    NewGame();
+                    pageIndex=0; 
+                }else exit = true;
                 selected2 = 0;
             }
             break;
@@ -264,10 +281,10 @@ int main(void)
             break;
 
         case 3: // GamePlay
+            timeRemaining -= GetFrameTime();
             DrawRectangle(0,0, WIDTH, HEIGHT, Fade(BLACK, 0.7f));
-            if(removedBalls==ballIndex){
+            if(removedBalls==ballIndex||timeRemaining<0){
                 pageIndex=4;
-                
             }
             if (IsKeyPressed(KEY_LEFT))
             {
@@ -328,7 +345,8 @@ int main(void)
                     bulletPosition.y = 0;
                     bulletVelocity.x = 0;
                     bulletVelocity.y = 0;
-                    shooterIndex = GetRandomValue(0,BALLNUM-1);
+                    shooterIndex = shooterIndex2;
+                    shooterIndex2 = GetRandomValue(0,BALLNUM-1);
                     shooted = false;
                 }
                 if(bulletPosition.x>800){
@@ -389,7 +407,36 @@ int main(void)
             // score
             char scores[30];
             sprintf(scores,"SCORE : %d",score);
+            char time[20];
+            sprintf(time,"TIME: %.0f",timeRemaining);
             DrawText(scores, 10 , HEIGHT-MeasureTextEx(GetFontDefault(),scores,FONTSIZE,FONTSIZE/10).y, FONTSIZE, TEXTCOLOR);
+
+            int nextTextHeight = MeasureTextEx(GetFontDefault(),"NEXT: ",FONTSIZE,FONTSIZE/10).y;
+            int timeHeight = MeasureTextEx(GetFontDefault(),time,FONTSIZE,FONTSIZE/10).y+nextTextHeight;
+            DrawText(time,WIDTH - MeasureText(time,FONTSIZE)-20, HEIGHT-timeHeight, FONTSIZE, TEXTCOLOR);
+            DrawText("NEXT: ",WIDTH - MeasureText("NEXT: ",FONTSIZE)-70 , HEIGHT-nextTextHeight, FONTSIZE, TEXTCOLOR);
+            Rectangle nextColor = {WIDTH - 60,HEIGHT-MeasureTextEx(GetFontDefault(),"NEXT: ",FONTSIZE,FONTSIZE/10).y,55,FONTSIZE};
+            switch (shooterIndex2)
+            {
+            case 0:
+                DrawRectangleRec(
+                    nextColor,
+                    (Color){255, 76, 97, 255}
+                );
+                break;
+            case 1:
+                DrawRectangleRec(
+                    nextColor,
+                    (Color){65, 159, 221, 255}
+                );
+                break;
+            case 2:
+                DrawRectangleRec(
+                    nextColor,
+                    (Color){67, 153, 108, 255}
+                );
+                break;
+            }
             break;
         case 4:// GameOver
             DrawText("Game Over", WIDTH/2 - MeasureText("Game Over",FONTSIZE*2)/2, 20 , FONTSIZE*2, BLACK);
@@ -421,6 +468,7 @@ int main(void)
         UnloadTexture(shooters[i]);
         UnloadTexture(balls[i]);
     }
+    UnloadTexture(balls[BALLNUM]);
     CloseWindow();
 
     return 0;
