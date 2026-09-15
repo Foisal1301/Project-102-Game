@@ -2,6 +2,7 @@
 #include "raymath.h"
 #include <stdio.h>
 #include <stdlib.h>
+#include <math.h>
 
 #define HEIGHT 600
 #define WIDTH 800
@@ -17,6 +18,8 @@
 #define HOVER_FONTSIZE 60
 #define LINEGAPFORTEXT 80
 #define TEXTPOSY 200
+#define TIMEREMAINING 10
+
 /*
 Pages
 0 => Start
@@ -24,7 +27,7 @@ Pages
 2 => About
 3 => GamePlay
 4 => GameOver
-MAXY = 450
+5 => LeaderBoard
 */
 Rectangle existedBalls[BALLROWS * BALLCOLS];
 int randBallIdx[BALLROWS * BALLCOLS];
@@ -32,10 +35,12 @@ int ballXadd = 0, ballYadd = 0;
 int ballIndex = 0;
 int removedBalls=0;
 int score = 0;
-float timeRemaining = 90;
+int pageIndex = 0;
+float timeRemaining;
 bool shooted;
+int high_scores[5];
 void NewGame(){
-    timeRemaining = 90;
+    timeRemaining = TIMEREMAINING;
     removedBalls=0;
     score = 0;
     shooted=false;
@@ -71,12 +76,150 @@ void NewGame(){
     }
 }
 
+void GameOver(){
+    pageIndex=4;
+
+    int index = -1;
+    for(int i=0;i<5;i++){
+        if(high_scores[i]<score){
+            index = i;
+            break;
+        }
+    }
+    if(index!=-1){
+        for(int i=4;i>index;i--) high_scores[i] = high_scores[i-1];
+        high_scores[index] = score;
+
+        FILE *highScoreFile=fopen("highScore.txt","w");
+        if(highScoreFile!=NULL){
+            for(int i=0;i<5;i++){
+                fprintf(highScoreFile,"%d\n",high_scores[i]);
+            }
+            fclose(highScoreFile);
+        }
+    }
+}
+
+float GetDistance(Vector2 p1, Vector2 p2)
+{
+    return sqrtf((p1.x - p2.x) * (p1.x - p2.x) + (p1.y - p2.y) * (p1.y - p2.y));
+}
+
+int placingIndex(Vector2 pos)
+{
+    int closestIdx = -1;
+    float minDistance = 10000000.0;
+
+    for (int i = 0; i < BALLROWS * BALLCOLS; i++)
+    {
+        if (existedBalls[i].width == 0)
+        {
+            int r = i / BALLCOLS;
+            int c = i % BALLCOLS;
+            float xAdd = (r % 2 == 0) ? BALLRADIUS : 0;
+
+            Vector2 cellPos = {
+                c * BALLRADIUS * 2 + xAdd + BALLRADIUS,
+                r * (BALLRADIUS * 1.735) + BALLRADIUS};
+
+            float dist = GetDistance(pos, cellPos);
+            if (dist < minDistance)
+            {
+                minDistance = dist;
+                closestIdx = i;
+            }
+        }
+    }
+    return closestIdx;
+}
+
+void FindConnectedBalls(int index, int targetColor, bool visited[], int matchedIndices[], int *count)
+{
+    visited[index] = true;
+    matchedIndices[*count] = index;
+    (*count)++;
+
+    Vector2 p1 = {existedBalls[index].x + BALLRADIUS, existedBalls[index].y + BALLRADIUS};
+
+    for (int i = 0; i < BALLROWS * BALLCOLS; i++)
+    {
+        if (!visited[i] && existedBalls[i].width > 0 && randBallIdx[i] == targetColor)
+        {
+            Vector2 p2 = {existedBalls[i].x + BALLRADIUS, existedBalls[i].y + BALLRADIUS};
+            float dist = GetDistance(p1, p2);
+
+            if (dist < BALLRADIUS * 2.2)
+            {
+                FindConnectedBalls(i, targetColor, visited, matchedIndices, count);
+            }
+        }
+    }
+}
+
+void CheckSimpleMatches(int hitIndex)
+{
+    bool visited[BALLROWS * BALLCOLS] = {false};
+    int matchedIndices[BALLROWS * BALLCOLS];
+    int count = 0;
+    int targetColor = randBallIdx[hitIndex];
+
+    FindConnectedBalls(hitIndex, targetColor, visited, matchedIndices, &count);
+
+    if (count >= 3)
+    {
+        for (int i = 0; i < count; i++)
+        {
+            int idx = matchedIndices[i];
+            existedBalls[idx] = (Rectangle){0, 0, 0, 0};
+            removedBalls++;
+        }
+        score += count * 10;
+    }
+}
+
 int main(void)
 {
     InitWindow(WIDTH, HEIGHT, "Bouncing Ball");
+
+    // BGM
+    InitAudioDevice();
+    Music menuBgm = LoadMusicStream("assets/sounds/menu.wav");
+    Music gameplayResumeBgm = LoadMusicStream("assets/sounds/Gameplay_Resume.mp3");
+    Music gameOverBgm = LoadMusicStream("assets/sounds/gameover.mp3");
+    Music *bgm = &menuBgm;
+
+    // Sound effect
+    Sound blast = LoadSound("assets/sounds/blast.mp3");
+    Sound bonus = LoadSound("assets/sounds/Bonus.wav");
+    Sound click = LoadSound("assets/sounds/Click.mp3");
+    Sound navigate = LoadSound("assets/sounds/navigate.mp3");
+    Sound gameover = LoadSound("assets/sounds/gameover_instant.mp3");
+    PlayMusicStream(*bgm);
+
     SetTargetFPS(60);
-    int pageIndex = 0;
-    
+
+    // score
+    FILE *highScoreFile=fopen("highScore.txt","r");
+    if(highScoreFile!=NULL){
+        for(int i=0;i<5;i++){
+            int status = fscanf(highScoreFile,"%d",&high_scores[i]);
+            if(status!=1){
+                high_scores[i] = 0;
+            }
+        }
+        fclose(highScoreFile);
+    }else{ // creating file for highscores
+        for (int i = 0; i < 5; i++) {
+            high_scores[i] = 0;
+        }
+        FILE* file = fopen("highScore.txt", "w");
+        if (file != NULL) {
+            for (int i = 0; i < 5; i++) {
+                fprintf(file, "%d\n", high_scores[i]);
+            }
+            fclose(file);
+        }
+    }
 
     // Global
     Texture2D bg = LoadTexture("assets/bg.png");
@@ -86,43 +229,7 @@ int main(void)
     int exit = 0;
 
     NewGame();
-    // GamePlay
-    // Grid // Swapno
-    // int ballIndex = 0;
-    
-    // Rectangle existedBalls[BALLROWS * BALLCOLS];
-    // for (int i = 0; i < BALLROWS * BALLCOLS; i++)
-    // {
-    //     existedBalls[i] = (Rectangle){0, 0, 0, 0};
-    // }
-    // int randBallIdx[BALLROWS * BALLCOLS];
-    // int ballXadd = 0, ballYadd = 0;
-    // for (int i = 0; i < 6; i++)
-    // {
-    //     for (int j = 0; j < BALLCOLS; j++)
-    //     {
-    //         if ((i % 2) == 0)
-    //         {
-    //             ballXadd = BALLRADIUS;
-    //         }
-    //         else
-    //         {
-    //             ballXadd = 0;
-    //         }
-
-    //         existedBalls[i * BALLCOLS + j] = (Rectangle){
-    //             j * BALLRADIUS * 2 + ballXadd,
-    //             i * (BALLRADIUS * 1.735),
-    //             BALLRADIUS * 2,
-    //             BALLRADIUS * 2};
-
-    //         randBallIdx[i * BALLCOLS + j] = GetRandomValue(0, 2);
-
-    //         ballIndex++;
-    //     }
-    // }
-
-    Texture2D balls[BALLNUM];
+    Texture2D balls[BALLNUM+1];
 
     for (int i = 0; i < BALLNUM; i++)
     {
@@ -152,69 +259,89 @@ int main(void)
 
     // resume
     int selected2 = 0;
+    const char *Resumehint = "[ PRESS 'P' TO PAUSE ]";
+    int ResumehintWidth = MeasureText(Resumehint, 18);
+
+    // LeaderBoard & About
+    const char *backHint = "[ PRESS 'E' TO GO BACK ]";
+    int hintWidth = MeasureText(backHint, 18);
 
     while (!WindowShouldClose() && !exit)
     {
+        UpdateMusicStream(*bgm);
         BeginDrawing();
         DrawTexture(bg, 0, 0, WHITE);
+        if(IsKeyPressed(KEY_UP)||IsKeyPressed(KEY_DOWN)||IsKeyPressed(KEY_LEFT)||IsKeyPressed(KEY_RIGHT)) PlaySound(navigate);
+        if(IsKeyPressed(KEY_ENTER)) PlaySound(click);
         switch (pageIndex)
         {
         case 0: // Menu
+            if(bgm != &menuBgm){
+                StopMusicStream(*bgm);
+                bgm = &menuBgm;
+                PlayMusicStream(*bgm);
+            }
             if (selectedOption == 0)
             {
-                DrawText("New Game", GetScreenWidth() / 2 - MeasureText("New Game", HOVER_FONTSIZE) / 2, TEXTPOSY, HOVER_FONTSIZE, TEXTCOLOR); // Hover effect
+                DrawText("NEW GAME", GetScreenWidth() / 2 - MeasureText("NEW GAME", HOVER_FONTSIZE) / 2, TEXTPOSY, HOVER_FONTSIZE, TEXTCOLOR); // Hover effect
             }
             else
             {
-                DrawText("New Game", GetScreenWidth() / 2 - MeasureText("New Game", FONTSIZE) / 2, TEXTPOSY, FONTSIZE, TEXTCOLOR);
+                DrawText("NEW GAME", GetScreenWidth() / 2 - MeasureText("NEW GAME", FONTSIZE) / 2, TEXTPOSY, FONTSIZE, TEXTCOLOR);
             }
 
             if (selectedOption == 1)
             {
-                DrawText("About", GetScreenWidth() / 2 - MeasureText("About", HOVER_FONTSIZE) / 2, TEXTPOSY+LINEGAPFORTEXT, HOVER_FONTSIZE, TEXTCOLOR); // Hover effect
+                DrawText("ABOUT", GetScreenWidth() / 2 - MeasureText("ABOUT", HOVER_FONTSIZE) / 2, TEXTPOSY+LINEGAPFORTEXT, HOVER_FONTSIZE, TEXTCOLOR); // Hover effect
             }
             else
             {
-                DrawText("About", GetScreenWidth() / 2 - MeasureText("About", FONTSIZE) / 2, TEXTPOSY+LINEGAPFORTEXT, FONTSIZE, TEXTCOLOR);
+                DrawText("ABOUT", GetScreenWidth() / 2 - MeasureText("ABOUT", FONTSIZE) / 2, TEXTPOSY+LINEGAPFORTEXT, FONTSIZE, TEXTCOLOR);
             }
 
             if (selectedOption == 2)
             {
-                DrawText("Exit", GetScreenWidth() / 2 - MeasureText("Exit", HOVER_FONTSIZE) / 2, TEXTPOSY+2*LINEGAPFORTEXT, HOVER_FONTSIZE, TEXTCOLOR); // Hover effect
+                DrawText("LEADERBOARD", GetScreenWidth() / 2 - MeasureText("LEADERBOARD", HOVER_FONTSIZE) / 2, TEXTPOSY+2*LINEGAPFORTEXT, HOVER_FONTSIZE, TEXTCOLOR); // Hover effect
             }
             else
             {
-                DrawText("Exit", GetScreenWidth() / 2 - MeasureText("Exit", FONTSIZE) / 2, TEXTPOSY+2*LINEGAPFORTEXT, FONTSIZE, TEXTCOLOR);
+                DrawText("LEADERBOARD", GetScreenWidth() / 2 - MeasureText("LEADERBOARD", FONTSIZE) / 2, TEXTPOSY+2*LINEGAPFORTEXT, FONTSIZE, TEXTCOLOR);
             }
 
-            if (IsKeyPressed(KEY_UP))
+            if (selectedOption == 3)
             {
-                if (selectedOption > 0)
-                    selectedOption--;
+                DrawText("EXIT", GetScreenWidth() / 2 - MeasureText("EXIT", HOVER_FONTSIZE) / 2, TEXTPOSY+3*LINEGAPFORTEXT, HOVER_FONTSIZE, TEXTCOLOR); // Hover effect
             }
-            if (IsKeyPressed(KEY_DOWN))
+            else
             {
+                DrawText("EXIT", GetScreenWidth() / 2 - MeasureText("EXIT", FONTSIZE) / 2, TEXTPOSY+3*LINEGAPFORTEXT, FONTSIZE, TEXTCOLOR);
+            }
 
-                if (selectedOption < 2)
-                    selectedOption++;
-            }
+            if (IsKeyPressed(KEY_UP) && selectedOption > 0) 
+                selectedOption--;
+            
+            if (IsKeyPressed(KEY_DOWN) && selectedOption < 3)
+                selectedOption++;
 
             // Page Shifting
             if (IsKeyPressed(KEY_ENTER))
             {
                 switch (selectedOption)
                 {
-                case 0:
+                case 0:// GamePlay
                     selectedOption = 0;
                     pageIndex = 3;
                     break;
 
-                case 1:
+                case 1://About
                     selectedOption = 0;
                     pageIndex = 2;
                     break;
-
-                case 2:
+                case 2://Leaderboard
+                    selectedOption = 0;
+                    pageIndex = 5;
+                    break;
+                case 3://Exit
                     selectedOption = 0;
                     exit = 1;
                     break;
@@ -224,29 +351,34 @@ int main(void)
             break;
         
         case 1: // Resume page
+            if(bgm != &gameplayResumeBgm){
+                StopMusicStream(*bgm);
+                bgm = &gameplayResumeBgm;
+                PlayMusicStream(*bgm);
+            }
             // resume,new game,exit
             if(selected2==0){
-                DrawText("Resume",WIDTH/2 - MeasureText("Resume",HOVER_FONTSIZE)/2,200,HOVER_FONTSIZE,TEXTCOLOR);
+                DrawText("RESUME",WIDTH/2 - MeasureText("RESUME",HOVER_FONTSIZE)/2,200,HOVER_FONTSIZE,TEXTCOLOR);
             }else{
-                DrawText("Resume",WIDTH/2 - MeasureText("Resume",FONTSIZE)/2,200,FONTSIZE,TEXTCOLOR);
+                DrawText("RESUME",WIDTH/2 - MeasureText("RESUME",FONTSIZE)/2,200,FONTSIZE,TEXTCOLOR);
             }
 
             if(selected2==1){
-                DrawText("New Game",WIDTH/2 - MeasureText("New Game",HOVER_FONTSIZE)/2,200+LINEGAPFORTEXT,HOVER_FONTSIZE,TEXTCOLOR);
+                DrawText("NEW GAME",WIDTH/2 - MeasureText("NEW GAME",HOVER_FONTSIZE)/2,200+LINEGAPFORTEXT,HOVER_FONTSIZE,TEXTCOLOR);
             }else{
-                DrawText("New Game",WIDTH/2 - MeasureText("New Game",FONTSIZE)/2,200+LINEGAPFORTEXT,FONTSIZE,TEXTCOLOR);
+                DrawText("NEW GAME",WIDTH/2 - MeasureText("NEW GAME",FONTSIZE)/2,200+LINEGAPFORTEXT,FONTSIZE,TEXTCOLOR);
             }
 
             if(selected2==2){
-                DrawText("Main Menu",WIDTH/2 - MeasureText("Main Menu",HOVER_FONTSIZE)/2,200+2*LINEGAPFORTEXT,HOVER_FONTSIZE,TEXTCOLOR);
+                DrawText("MAIN MENU",WIDTH/2 - MeasureText("MAIN MENU",HOVER_FONTSIZE)/2,200+2*LINEGAPFORTEXT,HOVER_FONTSIZE,TEXTCOLOR);
             }else{
-                DrawText("Main Menu",WIDTH/2 - MeasureText("Main Menu",FONTSIZE)/2,200+2*LINEGAPFORTEXT,FONTSIZE,TEXTCOLOR);
+                DrawText("MAIN MENU",WIDTH/2 - MeasureText("MAIN MENU",FONTSIZE)/2,200+2*LINEGAPFORTEXT,FONTSIZE,TEXTCOLOR);
             }
 
             if(selected2==3){
-                DrawText("Exit",WIDTH/2 - MeasureText("Exit",HOVER_FONTSIZE)/2,200+3*LINEGAPFORTEXT,HOVER_FONTSIZE,TEXTCOLOR);
+                DrawText("EXIT",WIDTH/2 - MeasureText("EXIT",HOVER_FONTSIZE)/2,200+3*LINEGAPFORTEXT,HOVER_FONTSIZE,TEXTCOLOR);
             }else{
-                DrawText("Exit",WIDTH/2 - MeasureText("Exit",FONTSIZE)/2,200+3*LINEGAPFORTEXT,FONTSIZE,TEXTCOLOR);
+                DrawText("EXIT",WIDTH/2 - MeasureText("EXIT",FONTSIZE)/2,200+3*LINEGAPFORTEXT,FONTSIZE,TEXTCOLOR);
             }
 
             if (IsKeyPressed(KEY_UP) && selected2>0) selected2--;
@@ -265,39 +397,58 @@ int main(void)
             }
             break;
         case 2: // About
-            if (IsKeyPressed(KEY_LEFT))
+            if(bgm != &menuBgm){
+                StopMusicStream(*bgm);
+                bgm = &menuBgm;
+                PlayMusicStream(*bgm);
+            }
+            if (IsKeyPressed(KEY_E))
             {
+                PlaySound(navigate);
                 pageIndex = 0;
             }
+
             DrawRectangle(10, 40, WIDTH-20, HEIGHT-50, Fade(BLACK, 0.7f));
-            DrawText("About", GetScreenWidth() / 2 - MeasureText("About", HOVER_FONTSIZE) / 2, 60, HOVER_FONTSIZE, TEXTCOLOR);
-            DrawText("Go Back", 10 , 10, 30, TEXTCOLOR);
-            DrawText("Bouncing Ball", GetScreenWidth() / 2 - MeasureText("Bouncing Ball", FONTSIZE) / 2, 60+LINEGAPFORTEXT, FONTSIZE, TEXTCOLOR);
-            DrawText("A simple ball bouncing game made with C and Raylib", 10 , 200, 30, TEXTCOLOR);
-            DrawText("Developers: Md. Foisal and Shahariar Sajid Swapno", 10 , 200+2*LINEGAPFORTEXT*0.5, 30, TEXTCOLOR);
-            DrawText("CONTROLS", GetScreenWidth() / 2 - MeasureText("CONTROLS", 30) / 2, 200+4*LINEGAPFORTEXT*0.5, 30, TEXTCOLOR);
-            DrawText("SPACE/MOUSE-LEFT: SHOOT", 10 , 200+6*LINEGAPFORTEXT*0.5, 30, TEXTCOLOR);
-            DrawText("LEFT ARROW: RESUME GAME", 10 , 200+7*LINEGAPFORTEXT*0.5, 30, TEXTCOLOR);
+            DrawText(backHint, (WIDTH - hintWidth) / 2, 0 + HEIGHT - 35, 18, SKYBLUE);
+            DrawText("ABOUT", GetScreenWidth() / 2 - MeasureText("ABOUT", HOVER_FONTSIZE) / 2, 60, HOVER_FONTSIZE, TEXTCOLOR);
+            DrawText("BOUNCING BALL", GetScreenWidth() / 2 - MeasureText("BOUNCING BALL", FONTSIZE) / 2, 60+LINEGAPFORTEXT, FONTSIZE, TEXTCOLOR);
+            DrawText("A SIMPLE BOUNCING BALL GAME MADE WITH C & RAYLIB", 10 , 200, 25, TEXTCOLOR);
+            DrawText("DEVELOPERS: MD. FOISAL & SHAHARIAR SAJID SWAPNO", 10 , 200+2*LINEGAPFORTEXT*0.5, 25, TEXTCOLOR);
+            DrawText("CONTROLS", GetScreenWidth() / 2 - MeasureText("CONTROLS", FONTSIZE) / 2, 200+4*LINEGAPFORTEXT*0.5, FONTSIZE, TEXTCOLOR);
+            DrawText("SPACE/MOUSE-LEFT: SHOOT", 10 , 200+6*LINEGAPFORTEXT*0.5, 25, TEXTCOLOR);
+            DrawText("P: RESUME GAME", 10 , 200+7*LINEGAPFORTEXT*0.5, 25, TEXTCOLOR);
+            DrawText("E: BACK FROM ABOUT/LEADERBOARD PAGE", 10 , 200+8*LINEGAPFORTEXT*0.5, 25, TEXTCOLOR);
             break;
 
         case 3: // GamePlay
+            if(bgm != &gameplayResumeBgm){
+                StopMusicStream(*bgm);
+                bgm = &gameplayResumeBgm;
+                PlayMusicStream(*bgm);
+            }
             timeRemaining -= GetFrameTime();
             DrawRectangle(0,0, WIDTH, HEIGHT, Fade(BLACK, 0.7f));
-            if(removedBalls==ballIndex||timeRemaining<0){
-                pageIndex=4;
+            DrawText(Resumehint, (WIDTH - ResumehintWidth) / 2, 0 + HEIGHT - 20, 18, SKYBLUE);
+            if(removedBalls==ballIndex||timeRemaining<0){ // GameOver
+                PlaySound(gameover);
+                score+=timeRemaining*10;
+                GameOver();
             }
-            if (IsKeyPressed(KEY_LEFT))
+            if (IsKeyPressed(KEY_P))
             {
+                PlaySound(navigate);
                 pageIndex = 1;
             }
             // drawing ball images //Swapno
 
-            for (int i = 0; i < ballIndex; i++)
-            {
-                DrawTexturePro(balls[randBallIdx[i]],
-                               (Rectangle){0, 0, balls[randBallIdx[i]].width, balls[randBallIdx[i]].height},
-                               existedBalls[i],
-                               Vector2Zero(), 0, WHITE);
+            // for (int i = 0; i < ballIndex; i++)
+            for (int i = 0; i < BALLROWS * BALLCOLS; i++)
+            {   
+                if (existedBalls[i].width > 0)
+                    DrawTexturePro(balls[randBallIdx[i]],
+                    (Rectangle){0, 0, balls[randBallIdx[i]].width, balls[randBallIdx[i]].height},
+                    existedBalls[i],
+                    Vector2Zero(), 0, WHITE);
             }
 
             // shooter
@@ -321,79 +472,113 @@ int main(void)
             );
             if (IsKeyPressed(KEY_SPACE)||IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
                 if(!shooted){
+                    PlaySound(blast);
                     shooted=true;
-                    bulletPosition.x = cannonBase.x + CANNON_HEIGHT*cos(cannonAngle*DEG2RAD);
-                    bulletPosition.y = cannonBase.y + CANNON_HEIGHT*sin(cannonAngle*DEG2RAD);
+                    bulletPosition.x = cannonBase.x + CANNON_HEIGHT * cos(cannonAngle * DEG2RAD) - BALLRADIUS;
+                    bulletPosition.y = cannonBase.y + CANNON_HEIGHT * sin(cannonAngle * DEG2RAD) - BALLRADIUS;
+
                     bulletVelocity.x = VELOCITY_OF_BULLET*cos(cannonAngle*DEG2RAD);
                     bulletVelocity.y = VELOCITY_OF_BULLET*sin(cannonAngle*DEG2RAD);
                     if(bulletVelocity.y>0) bulletVelocity.y = -bulletVelocity.y;
                 }
             }
-
+            bool isCollision = false;
             if(shooted){
                 Rectangle shootedBall = (Rectangle){bulletPosition.x, bulletPosition.y, BALLRADIUS * 2, BALLRADIUS * 2};
                 bulletPosition.x += bulletVelocity.x;
                 bulletPosition.y += bulletVelocity.y;
-                if(bulletPosition.x<0){
-                    bulletPosition.x = 0;
-                    bulletVelocity.x = -bulletVelocity.x;
-                }else if(bulletPosition.x>=WIDTH){
-                    bulletPosition.x = WIDTH;
+                if (bulletPosition.x <= 0 || bulletPosition.x >= WIDTH - BALLRADIUS * 2)
+                {
                     bulletVelocity.x = -bulletVelocity.x;
                 }
-                if(bulletPosition.y<0){
-                    bulletPosition.y = 0;
-                    bulletVelocity.x = 0;
-                    bulletVelocity.y = 0;
+
+                // collision with roof
+                if(bulletPosition.y<=0){
+                    Vector2 bulletCenter = {bulletPosition.x + BALLRADIUS, bulletPosition.y + BALLRADIUS};
+                    int targetIdx = placingIndex(bulletCenter);
+
+                    if (targetIdx != -1)
+                    {
+                        int r = targetIdx / BALLCOLS;
+                        int c = targetIdx % BALLCOLS;
+                        float xAdd = (r % 2 == 0) ? BALLRADIUS : 0;
+
+                        existedBalls[targetIdx] = (Rectangle){
+                            c * BALLRADIUS * 2 + xAdd,
+                            r * (BALLRADIUS * 1.735),
+                            BALLRADIUS * 2, BALLRADIUS * 2};
+                        randBallIdx[targetIdx] = shooterIndex;
+                        ballIndex++;
+
+                        CheckSimpleMatches(targetIdx);
+                    }
+
                     shooterIndex = shooterIndex2;
                     shooterIndex2 = GetRandomValue(0,BALLNUM-1);
                     shooted = false;
-                }
-                if(bulletPosition.x>800){
-                    bulletPosition.x = 800;
-                    bulletVelocity.x = -bulletVelocity.x;
+                    isCollision = true;
                 }
 
-                bool isCollision = false;
-
-                for (int i = 0; i < ballIndex && !isCollision; i++)
+                for (int i = 0; i < BALLROWS * BALLCOLS && !isCollision; i++)
                 {
-                    if (CheckCollisionRecs(shootedBall, existedBalls[i]) && shooterIndex == randBallIdx[i])
+                    if (existedBalls[i].width > 0)
                     {
-                        isCollision = true;
+                        Vector2 shootedCenter = {
+                            shootedBall.x + BALLRADIUS,
+                            shootedBall.y + BALLRADIUS};
 
-                        existedBalls[i] = (Rectangle){0, 0, 0, 0};
-                        removedBalls++;
+                        Vector2 existedCenter = {
+                            existedBalls[i].x + BALLRADIUS,
+                            existedBalls[i].y + BALLRADIUS};
 
-                        // float newX;
+                        if (CheckCollisionCircles(
+                                shootedCenter,
+                                BALLRADIUS - 5,
+                                existedCenter,
+                                BALLRADIUS))
+                        {
+                            isCollision = true;
 
-                        // if (bulletVelocity.x < 0)
-                        // {
-                        //     newX = existedBalls[i].x + BALLRADIUS;
-                        // }
-                        // else
-                        // {
-                        //     newX = existedBalls[i].x - BALLRADIUS;
-                        // }
+                            Vector2 bulletCenter = {
+                                bulletPosition.x + BALLRADIUS,
+                                bulletPosition.y + BALLRADIUS};
 
-                        // existedBalls[ballIndex] = (Rectangle){
-                        //     newX,
-                        //     existedBalls[i].y + 1.73 * BALLRADIUS,
-                        //     BALLRADIUS * 2,
-                        //     BALLRADIUS * 2};
+                            int targetIdx = placingIndex(bulletCenter);
 
-                        // randBallIdx[ballIndex] = shooterIndex;
+                            if (targetIdx != -1)
+                            {
+                                int r = targetIdx / BALLCOLS;
+                                int c = targetIdx % BALLCOLS;
 
-                        // ballIndex++;
+                                float xAdd =
+                                    (r % 2 == 0) ? BALLRADIUS : 0;
 
-                        // bulletVelocity.x = 0;
-                        // bulletVelocity.y = 0;
+                                existedBalls[targetIdx] = (Rectangle){
+                                    c * BALLRADIUS * 2 + xAdd,
+                                    r * (BALLRADIUS * 1.735),
+                                    BALLRADIUS * 2,
+                                    BALLRADIUS * 2};
 
-                        // shooted = false;
-                        // shooterIndex = GetRandomValue(0, BALLNUM-1);
+                                randBallIdx[targetIdx] = shooterIndex;
+                                ballIndex++;
+
+                                CheckSimpleMatches(targetIdx);
+
+                                if ((r * (BALLRADIUS * 1.735f)) >= 375)
+                                {
+                                    pageIndex = 4;
+                                    PlaySound(gameover);
+                                    GameOver();
+                                }
+                            }
+
+                            shooted = false;
+
+                            shooterIndex = shooterIndex2;
+                            shooterIndex2 = GetRandomValue(0, BALLNUM - 1);
+                        }
                     }
                 }
-                
                 
                 DrawTexturePro(
                     balls[shooterIndex],
@@ -439,25 +624,80 @@ int main(void)
             }
             break;
         case 4:// GameOver
-            DrawText("Game Over", WIDTH/2 - MeasureText("Game Over",FONTSIZE*2)/2, 20 , FONTSIZE*2, BLACK);
+            if(bgm != &gameOverBgm){
+                StopMusicStream(*bgm);
+                bgm = &gameOverBgm;
+                PlayMusicStream(*bgm);
+            }
+            DrawText("GAME OVER", WIDTH/2 - MeasureText("GAME OVER",FONTSIZE*2)/2, 20 , FONTSIZE*2, BLACK);
+            
+            char high[50];
+            sprintf(high,"HIGH SCORE: %d",high_scores[0]);
+            DrawText(high, WIDTH/2 - MeasureText(high,FONTSIZE)/2, 120 , FONTSIZE, BLACK);
+            
             DrawText(scores, WIDTH/2 - MeasureText(scores,FONTSIZE)/2, 200 , FONTSIZE, BLACK);
+            char timeText[100];
+            sprintf(timeText,"TIME: %.0lf S",TIMEREMAINING-timeRemaining);
+            DrawText(timeText, WIDTH/2 - MeasureText(timeText,FONTSIZE)/2, 200+LINEGAPFORTEXT , FONTSIZE, BLACK);
 
             if(selected==0){
-                DrawText("New Game", 200 - MeasureText("New Game",FONTSIZE)/2, 300 , HOVER_FONTSIZE, TEXTCOLOR);
-                DrawText("Exit", 600 - MeasureText("Exit",FONTSIZE)/2, 300 , FONTSIZE, TEXTCOLOR);
+                DrawText("NEW GAME", 135 - MeasureText("NEW GAME",HOVER_FONTSIZE/1.5)/2, 360 , HOVER_FONTSIZE/1.5, TEXTCOLOR);
+                
             }else{
-                DrawText("New Game", 200 - MeasureText("New Game",FONTSIZE)/2, 300 , FONTSIZE, TEXTCOLOR);
-                DrawText("Exit", 600 - MeasureText("Exit",FONTSIZE)/2, 300 , HOVER_FONTSIZE, TEXTCOLOR);
+                DrawText("NEW GAME", 135 - MeasureText("NEW GAME",FONTSIZE/1.5)/2, 360 , FONTSIZE/1.5, TEXTCOLOR);
             }
-            if(IsKeyPressed(KEY_RIGHT)||IsKeyPressed(KEY_LEFT)) selected=!selected;
+
+            if(selected==1){
+                DrawText("LEADERBOARD", WIDTH/2 - MeasureText("LEADERBOARD",HOVER_FONTSIZE/1.5)/2, 360 , HOVER_FONTSIZE/1.5, TEXTCOLOR);
+            }else{
+                DrawText("LEADERBOARD", WIDTH/2 - MeasureText("LEADERBOARD",FONTSIZE/1.5)/2, 360 , FONTSIZE/1.5, TEXTCOLOR);
+            }
+
+            if(selected==2){
+                DrawText("EXIT", 650 - MeasureText("EXIT",HOVER_FONTSIZE/1.5)/2, 360 , HOVER_FONTSIZE/1.5, TEXTCOLOR);
+            }else{
+                DrawText("EXIT", 650 - MeasureText("EXIT",FONTSIZE/1.5)/2, 360 , FONTSIZE/1.5, TEXTCOLOR);
+            }
+
+            if(IsKeyPressed(KEY_LEFT)&&selected>0) selected--;
+
+            if(IsKeyPressed(KEY_RIGHT)&&selected<2) selected++;
+
             if(IsKeyPressed(KEY_ENTER)){
-                if(selected==1) exit = true;
-                else{
+                if(selected==0){
                     NewGame();
                     selected = 0;
                     pageIndex = 3;
-                }
+                }else if(selected==1){
+                    NewGame();
+                    selected=0;
+                    pageIndex=5;
+                }else exit = true;  
             }
+            break;
+        case 5:// Leaderboard
+            if(bgm != &menuBgm){
+                StopMusicStream(*bgm);
+                bgm = &menuBgm;
+                PlayMusicStream(*bgm);
+            }
+            if (IsKeyPressed(KEY_E))
+            {
+                PlaySound(navigate);
+                pageIndex = 0;
+            }
+            DrawRectangle(10, 40, WIDTH-20, HEIGHT-50, Fade(BLACK, 0.7f));
+            DrawText("LEADERBOARD", GetScreenWidth() / 2 - MeasureText("LEADERBOARD", HOVER_FONTSIZE) / 2, 60, HOVER_FONTSIZE, TEXTCOLOR);
+            DrawText(backHint, (WIDTH - hintWidth) / 2, 0 + HEIGHT - 35, 18, SKYBLUE);
+
+            for(int i=0;i<5;i++){
+                char rankText[20],scoreText[20];
+                sprintf(rankText,"RANK#%d",i+1);
+                sprintf(scoreText,"%d",high_scores[i]);
+                DrawText(rankText, 200, 150+i*LINEGAPFORTEXT, FONTSIZE/1.25, TEXTCOLOR);
+                DrawText(scoreText, 500, 150+i*LINEGAPFORTEXT, FONTSIZE/1.25, TEXTCOLOR);
+            }
+            
             break;
         }
         EndDrawing();
@@ -469,7 +709,15 @@ int main(void)
         UnloadTexture(balls[i]);
     }
     UnloadTexture(balls[BALLNUM]);
+    UnloadMusicStream(menuBgm);
+    UnloadMusicStream(gameplayResumeBgm);
+    UnloadMusicStream(gameOverBgm);
+    UnloadSound(blast);
+    UnloadSound(gameover);
+    UnloadSound(navigate);
+    UnloadSound(click);
+    UnloadSound(bonus);
+    CloseAudioDevice();
     CloseWindow();
-
     return 0;
 }
