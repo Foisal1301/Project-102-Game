@@ -18,7 +18,7 @@
 #define HOVER_FONTSIZE 60
 #define LINEGAPFORTEXT 80
 #define TEXTPOSY 200
-#define TIMEREMAINING 10
+#define TIMEREMAINING 90
 
 /*
 Pages
@@ -37,10 +37,12 @@ int removedBalls=0;
 int score = 0;
 int pageIndex = 0;
 float timeRemaining;
+float timePassed;
 bool shooted;
 int high_scores[5];
 void NewGame(){
     timeRemaining = TIMEREMAINING;
+    timePassed = 0;
     removedBalls=0;
     score = 0;
     shooted=false;
@@ -69,8 +71,10 @@ void NewGame(){
                 i * (BALLRADIUS * 1.735),
                 BALLRADIUS * 2,
                 BALLRADIUS * 2};
-
-            randBallIdx[i * BALLCOLS + j] = GetRandomValue(0, 2);
+            
+            int probabilityForTimeBall = GetRandomValue(0,9);
+            if(probabilityForTimeBall==9) randBallIdx[i * BALLCOLS + j] = 3;
+            else randBallIdx[i * BALLCOLS + j] = GetRandomValue(0, 2);
             ballIndex++;
         }
     }
@@ -427,6 +431,7 @@ int main(void)
                 PlayMusicStream(*bgm);
             }
             timeRemaining -= GetFrameTime();
+            timePassed+= GetFrameTime();
             DrawRectangle(0,0, WIDTH, HEIGHT, Fade(BLACK, 0.7f));
             DrawText(Resumehint, (WIDTH - ResumehintWidth) / 2, 0 + HEIGHT - 20, 18, SKYBLUE);
             if(removedBalls==ballIndex||timeRemaining<0){ // GameOver
@@ -509,7 +514,7 @@ int main(void)
                             BALLRADIUS * 2, BALLRADIUS * 2};
                         randBallIdx[targetIdx] = shooterIndex;
                         ballIndex++;
-
+                        
                         CheckSimpleMatches(targetIdx);
                     }
 
@@ -539,36 +544,43 @@ int main(void)
                         {
                             isCollision = true;
 
-                            Vector2 bulletCenter = {
+                            if(randBallIdx[i]==3){
+                                timeRemaining += 10;
+                                PlaySound(bonus);
+                                existedBalls[i] = (Rectangle){0, 0, 0, 0};
+                                removedBalls++;
+                            }else{
+                                Vector2 bulletCenter = {
                                 bulletPosition.x + BALLRADIUS,
                                 bulletPosition.y + BALLRADIUS};
 
-                            int targetIdx = placingIndex(bulletCenter);
+                                int targetIdx = placingIndex(bulletCenter);
 
-                            if (targetIdx != -1)
-                            {
-                                int r = targetIdx / BALLCOLS;
-                                int c = targetIdx % BALLCOLS;
-
-                                float xAdd =
-                                    (r % 2 == 0) ? BALLRADIUS : 0;
-
-                                existedBalls[targetIdx] = (Rectangle){
-                                    c * BALLRADIUS * 2 + xAdd,
-                                    r * (BALLRADIUS * 1.735),
-                                    BALLRADIUS * 2,
-                                    BALLRADIUS * 2};
-
-                                randBallIdx[targetIdx] = shooterIndex;
-                                ballIndex++;
-
-                                CheckSimpleMatches(targetIdx);
-
-                                if ((r * (BALLRADIUS * 1.735f)) >= 375)
+                                if (targetIdx != -1)
                                 {
-                                    pageIndex = 4;
-                                    PlaySound(gameover);
-                                    GameOver();
+                                    int r = targetIdx / BALLCOLS;
+                                    int c = targetIdx % BALLCOLS;
+
+                                    float xAdd =
+                                        (r % 2 == 0) ? BALLRADIUS : 0;
+
+                                    existedBalls[targetIdx] = (Rectangle){
+                                        c * BALLRADIUS * 2 + xAdd,
+                                        r * (BALLRADIUS * 1.735),
+                                        BALLRADIUS * 2,
+                                        BALLRADIUS * 2};
+
+                                    randBallIdx[targetIdx] = shooterIndex;
+                                    ballIndex++;
+                                    CheckSimpleMatches(targetIdx);
+                                    
+
+                                    if ((r * (BALLRADIUS * 1.735f)) >= 375)
+                                    {
+                                        pageIndex = 4;
+                                        PlaySound(gameover);
+                                        GameOver();
+                                    }
                                 }
                             }
 
@@ -637,7 +649,7 @@ int main(void)
             
             DrawText(scores, WIDTH/2 - MeasureText(scores,FONTSIZE)/2, 200 , FONTSIZE, BLACK);
             char timeText[100];
-            sprintf(timeText,"TIME: %.0lf S",TIMEREMAINING-timeRemaining);
+            sprintf(timeText,"TIME: %.0f S",timePassed);
             DrawText(timeText, WIDTH/2 - MeasureText(timeText,FONTSIZE)/2, 200+LINEGAPFORTEXT , FONTSIZE, BLACK);
 
             if(selected==0){
