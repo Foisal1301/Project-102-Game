@@ -44,6 +44,7 @@ float timePassed;
 float blastAnimation;
 bool shooted;
 int high_scores[5];
+char gameOverReason[80];
 void NewGame(){
     ballIndex=0;
     removedBalls=0;
@@ -52,6 +53,7 @@ void NewGame(){
     blastAnimation = 0;
     timePassed = 0;
     shooted=false;
+    strcpy(gameOverReason,"YOU WON!");
 
     for (int i = 0; i < BALLROWS * BALLCOLS; i++)
     {
@@ -165,8 +167,9 @@ void FindConnectedBalls(int index, int targetColor, bool visited[], int matchedI
     }
 }
 
-void CheckSimpleMatches(int hitIndex)
+bool CheckSimpleMatches(int hitIndex)
 {
+    bool isVanished = false;
     bool visited[BALLROWS * BALLCOLS] = {false};
     int matchedIndices[BALLROWS * BALLCOLS];
     int count = 0;
@@ -183,7 +186,9 @@ void CheckSimpleMatches(int hitIndex)
             removedBalls++;
         }
         score += count * 10;
+        isVanished=true;
     }
+    return isVanished;
 }
 
 int main(void)
@@ -195,6 +200,7 @@ int main(void)
     Music menuBgm = LoadMusicStream("assets/sounds/menu.wav");
     Music gameplayResumeBgm = LoadMusicStream("assets/sounds/Gameplay_Resume.mp3");
     Music gameOverBgm = LoadMusicStream("assets/sounds/gameover.mp3");
+    Music countDown = LoadMusicStream("assets/sounds/countdown.wav");
     Music *bgm = &menuBgm;
 
     // Sound effect
@@ -203,8 +209,11 @@ int main(void)
     Sound click = LoadSound("assets/sounds/Click.mp3");
     Sound navigate = LoadSound("assets/sounds/navigate.mp3");
     Sound gameover = LoadSound("assets/sounds/gameover_instant.mp3");
+    Sound winSound = LoadSound("assets/sounds/win.wav");
+    
     int vol = BGMVOLUME;
     PlayMusicStream(*bgm);
+    PlayMusicStream(countDown);
 
     SetTargetFPS(60);
 
@@ -230,7 +239,6 @@ int main(void)
             fclose(file);
         }
     }
-
     // Global
     Texture2D bg = LoadTexture("assets/bg.png");
 
@@ -475,14 +483,22 @@ int main(void)
                 PlayMusicStream(*bgm);
             }
             SetMusicVolume(*bgm,vol);
+            if(timeRemaining<=10){
+                UpdateMusicStream(countDown);
+                SetMusicVolume(countDown,vol);
+            }
 
             timeRemaining -= GetFrameTime();
             timePassed+= GetFrameTime();
-            DrawRectangle(0,0, WIDTH, HEIGHT, Fade(BLACK, 0.7f));
+            DrawRectangle(0,0, WIDTH, HEIGHT, Fade(BLACK, 0.3f));
             DrawText(Resumehint, (WIDTH - ResumehintWidth) / 2, 0 + HEIGHT - 20, 18, SKYBLUE);
             if(removedBalls==ballIndex||timeRemaining<0){ // GameOver
-                PlaySound(gameover);
                 score+=timeRemaining*10;
+                
+                if(timeRemaining<=0){
+                    strcpy(gameOverReason,"GAMEOVER! TIME UP!");
+                    PlaySound(gameover);
+                }else PlaySound(winSound);
                 GameOver();
             }
             if (IsKeyPressed(KEY_P))
@@ -630,13 +646,12 @@ int main(void)
 
                                     randBallIdx[targetIdx] = shooterIndex;
                                     ballIndex++;
-                                    CheckSimpleMatches(targetIdx);
-                                    
-
-                                    if ((r * (BALLRADIUS * 1.735f)) >= 375)
+                                    bool isVanished = CheckSimpleMatches(targetIdx);
+                                    if (!isVanished && (r * (BALLRADIUS * 1.735f)) >= 375)
                                     {
                                         pageIndex = 4;
                                         PlaySound(gameover);
+                                        strcpy(gameOverReason,"GAMEOVER! YOU CROSSED THE LINE!");
                                         GameOver();
                                     }
                                 }
@@ -668,7 +683,7 @@ int main(void)
 
             int nextTextHeight = MeasureTextEx(GetFontDefault(),"NEXT: ",FONTSIZE,FONTSIZE/10).y;
             int timeHeight = MeasureTextEx(GetFontDefault(),time,FONTSIZE,FONTSIZE/10).y+nextTextHeight;
-            DrawText(time,WIDTH - MeasureText(time,FONTSIZE)-20, HEIGHT-timeHeight, FONTSIZE, TEXTCOLOR);
+            DrawText(time,WIDTH - MeasureText(time,FONTSIZE)-20, HEIGHT-timeHeight, FONTSIZE, timeRemaining>=10?TEXTCOLOR:RED);
             DrawText("NEXT: ",WIDTH - MeasureText("NEXT: ",FONTSIZE)-70 , HEIGHT-nextTextHeight, FONTSIZE, TEXTCOLOR);
             Rectangle nextColor = {WIDTH - 60,HEIGHT-MeasureTextEx(GetFontDefault(),"NEXT: ",FONTSIZE,FONTSIZE/10).y,55,FONTSIZE};
             switch (shooterIndex2)
@@ -699,9 +714,10 @@ int main(void)
                 bgm = &gameOverBgm;
                 PlayMusicStream(*bgm);
             }
+            StopMusicStream(countDown);
             SetMusicVolume(*bgm,vol);
 
-            DrawText("GAME OVER", WIDTH/2 - MeasureText("GAME OVER",FONTSIZE*2)/2, 20 , FONTSIZE*2, BLACK);
+            DrawText(gameOverReason, WIDTH/2 - MeasureText(gameOverReason,FONTSIZE)/2, 20 , FONTSIZE, BLACK);
             
             char high[50];
             sprintf(high,"HIGH SCORE: %d",high_scores[0]);
@@ -795,6 +811,8 @@ int main(void)
     UnloadSound(navigate);
     UnloadSound(click);
     UnloadSound(bonus);
+    UnloadMusicStream(countDown);
+    UnloadSound(winSound);
     CloseAudioDevice();
     CloseWindow();
     return 0;
