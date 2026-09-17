@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
+#include <string.h>
 
 #define HEIGHT 600
 #define WIDTH 800
@@ -19,7 +20,8 @@
 #define LINEGAPFORTEXT 80
 #define TEXTPOSY 200
 #define TIMEREMAINING 90
-
+#define BGMVOLUME 2
+#define ANIMATION_TIME 0.1
 /*
 Pages
 0 => Start
@@ -34,19 +36,22 @@ int randBallIdx[BALLROWS * BALLCOLS];
 int ballXadd = 0, ballYadd = 0;
 int ballIndex = 0;
 int removedBalls=0;
+
 int score = 0;
 int pageIndex = 0;
 float timeRemaining;
 float timePassed;
+float blastAnimation;
 bool shooted;
 int high_scores[5];
 void NewGame(){
-    timeRemaining = TIMEREMAINING;
-    timePassed = 0;
+    ballIndex=0;
     removedBalls=0;
     score = 0;
+    timeRemaining = TIMEREMAINING;
+    blastAnimation = 0;
+    timePassed = 0;
     shooted=false;
-    ballIndex=0;
 
     for (int i = 0; i < BALLROWS * BALLCOLS; i++)
     {
@@ -198,6 +203,7 @@ int main(void)
     Sound click = LoadSound("assets/sounds/Click.mp3");
     Sound navigate = LoadSound("assets/sounds/navigate.mp3");
     Sound gameover = LoadSound("assets/sounds/gameover_instant.mp3");
+    int vol = BGMVOLUME;
     PlayMusicStream(*bgm);
 
     SetTargetFPS(60);
@@ -232,6 +238,18 @@ int main(void)
     int selectedOption = 0;
     int exit = 0;
 
+    // GameOver
+    int selected = 0;
+
+    // resume
+    int selected2 = 0;
+    const char *Resumehint = "[ PRESS 'P' TO PAUSE ]";
+    int ResumehintWidth = MeasureText(Resumehint, 18);
+
+    // LeaderBoard & About
+    const char *backHint = "[ PRESS 'E' TO GO BACK ]";
+    int hintWidth = MeasureText(backHint, 18);
+
     NewGame();
     Texture2D balls[BALLNUM+1];
 
@@ -253,25 +271,26 @@ int main(void)
         sprintf(path,"assets/shooter_%d.png",i+1);
         shooters[i] = LoadTexture(path);
     }
+
+    // Blast
+    Texture2D blastShooters[BALLNUM];
+    for(int i=0;i<BALLNUM;i++){
+        char path[50];
+        sprintf(path,"assets/shooter_%d_blast.png",i+1);
+        blastShooters[i] = LoadTexture(path);
+    }
+
     int shooterIndex = GetRandomValue(0,BALLNUM-1);
     int shooterIndex2 = GetRandomValue(0,BALLNUM-1);
     Vector2 bulletPosition = {0,0};
     Vector2 bulletVelocity = {0,0};
 
-    // GameOver
-    int selected = 0;
-
-    // resume
-    int selected2 = 0;
-    const char *Resumehint = "[ PRESS 'P' TO PAUSE ]";
-    int ResumehintWidth = MeasureText(Resumehint, 18);
-
-    // LeaderBoard & About
-    const char *backHint = "[ PRESS 'E' TO GO BACK ]";
-    int hintWidth = MeasureText(backHint, 18);
-
     while (!WindowShouldClose() && !exit)
-    {
+    {   
+        char vol_text[30];
+        if(vol!=0) strcpy(vol_text,"TURN OFF MUSIC");
+        else strcpy(vol_text,"TURN ON MUSIC");
+
         UpdateMusicStream(*bgm);
         BeginDrawing();
         DrawTexture(bg, 0, 0, WHITE);
@@ -285,6 +304,7 @@ int main(void)
                 bgm = &menuBgm;
                 PlayMusicStream(*bgm);
             }
+            SetMusicVolume(*bgm,vol);
             if (selectedOption == 0)
             {
                 DrawText("NEW GAME", GetScreenWidth() / 2 - MeasureText("NEW GAME", HOVER_FONTSIZE) / 2, TEXTPOSY, HOVER_FONTSIZE, TEXTCOLOR); // Hover effect
@@ -311,20 +331,28 @@ int main(void)
             {
                 DrawText("LEADERBOARD", GetScreenWidth() / 2 - MeasureText("LEADERBOARD", FONTSIZE) / 2, TEXTPOSY+2*LINEGAPFORTEXT, FONTSIZE, TEXTCOLOR);
             }
-
             if (selectedOption == 3)
             {
-                DrawText("EXIT", GetScreenWidth() / 2 - MeasureText("EXIT", HOVER_FONTSIZE) / 2, TEXTPOSY+3*LINEGAPFORTEXT, HOVER_FONTSIZE, TEXTCOLOR); // Hover effect
+                DrawText(vol_text, GetScreenWidth() / 2 - MeasureText(vol_text, HOVER_FONTSIZE) / 2, TEXTPOSY+3*LINEGAPFORTEXT, HOVER_FONTSIZE, TEXTCOLOR); // Hover effect
             }
             else
             {
-                DrawText("EXIT", GetScreenWidth() / 2 - MeasureText("EXIT", FONTSIZE) / 2, TEXTPOSY+3*LINEGAPFORTEXT, FONTSIZE, TEXTCOLOR);
+                DrawText(vol_text, GetScreenWidth() / 2 - MeasureText(vol_text, FONTSIZE) / 2, TEXTPOSY+3*LINEGAPFORTEXT, FONTSIZE, TEXTCOLOR);
+            }
+
+            if (selectedOption == 4)
+            {
+                DrawText("EXIT", GetScreenWidth() / 2 - MeasureText("EXIT", HOVER_FONTSIZE) / 2, TEXTPOSY+4*LINEGAPFORTEXT, HOVER_FONTSIZE, TEXTCOLOR); // Hover effect
+            }
+            else
+            {
+                DrawText("EXIT", GetScreenWidth() / 2 - MeasureText("EXIT", FONTSIZE) / 2, TEXTPOSY+4*LINEGAPFORTEXT, FONTSIZE, TEXTCOLOR);
             }
 
             if (IsKeyPressed(KEY_UP) && selectedOption > 0) 
                 selectedOption--;
             
-            if (IsKeyPressed(KEY_DOWN) && selectedOption < 3)
+            if (IsKeyPressed(KEY_DOWN) && selectedOption < 4)
                 selectedOption++;
 
             // Page Shifting
@@ -345,7 +373,11 @@ int main(void)
                     selectedOption = 0;
                     pageIndex = 5;
                     break;
-                case 3://Exit
+                case 3:
+                    if(vol==0) vol=BGMVOLUME;
+                    else vol=0;
+                    break;
+                case 4://Exit
                     selectedOption = 0;
                     exit = 1;
                     break;
@@ -360,6 +392,7 @@ int main(void)
                 bgm = &gameplayResumeBgm;
                 PlayMusicStream(*bgm);
             }
+            SetMusicVolume(*bgm,vol);
             // resume,new game,exit
             if(selected2==0){
                 DrawText("RESUME",WIDTH/2 - MeasureText("RESUME",HOVER_FONTSIZE)/2,200,HOVER_FONTSIZE,TEXTCOLOR);
@@ -380,13 +413,19 @@ int main(void)
             }
 
             if(selected2==3){
-                DrawText("EXIT",WIDTH/2 - MeasureText("EXIT",HOVER_FONTSIZE)/2,200+3*LINEGAPFORTEXT,HOVER_FONTSIZE,TEXTCOLOR);
+                DrawText(vol_text,WIDTH/2 - MeasureText(vol_text,HOVER_FONTSIZE)/2,200+3*LINEGAPFORTEXT,HOVER_FONTSIZE,TEXTCOLOR);
             }else{
-                DrawText("EXIT",WIDTH/2 - MeasureText("EXIT",FONTSIZE)/2,200+3*LINEGAPFORTEXT,FONTSIZE,TEXTCOLOR);
+                DrawText(vol_text,WIDTH/2 - MeasureText(vol_text,FONTSIZE)/2,200+3*LINEGAPFORTEXT,FONTSIZE,TEXTCOLOR);
+            }
+
+            if(selected2==4){
+                DrawText("EXIT",WIDTH/2 - MeasureText("EXIT",HOVER_FONTSIZE)/2,200+4*LINEGAPFORTEXT,HOVER_FONTSIZE,TEXTCOLOR);
+            }else{
+                DrawText("EXIT",WIDTH/2 - MeasureText("EXIT",FONTSIZE)/2,200+4*LINEGAPFORTEXT,FONTSIZE,TEXTCOLOR);
             }
 
             if (IsKeyPressed(KEY_UP) && selected2>0) selected2--;
-            if (IsKeyPressed(KEY_DOWN) && selected2<3) selected2++;
+            if (IsKeyPressed(KEY_DOWN) && selected2<4) selected2++;
             
             if (IsKeyPressed(KEY_ENTER)){
                 if(selected2==0) pageIndex = 3;
@@ -396,7 +435,11 @@ int main(void)
                 }else if(selected2==2){
                     NewGame();
                     pageIndex=0; 
-                }else exit = true;
+                }else if(selected2==3){
+                    if(vol==0) vol = BGMVOLUME;
+                    else vol = 0;
+                }
+                else exit = true;
                 selected2 = 0;
             }
             break;
@@ -406,6 +449,7 @@ int main(void)
                 bgm = &menuBgm;
                 PlayMusicStream(*bgm);
             }
+            SetMusicVolume(*bgm,vol);
             if (IsKeyPressed(KEY_E))
             {
                 PlaySound(navigate);
@@ -430,6 +474,8 @@ int main(void)
                 bgm = &gameplayResumeBgm;
                 PlayMusicStream(*bgm);
             }
+            SetMusicVolume(*bgm,vol);
+
             timeRemaining -= GetFrameTime();
             timePassed+= GetFrameTime();
             DrawRectangle(0,0, WIDTH, HEIGHT, Fade(BLACK, 0.7f));
@@ -446,7 +492,6 @@ int main(void)
             }
             // drawing ball images //Swapno
 
-            // for (int i = 0; i < ballIndex; i++)
             for (int i = 0; i < BALLROWS * BALLCOLS; i++)
             {   
                 if (existedBalls[i].width > 0)
@@ -464,20 +509,33 @@ int main(void)
             if(tempAngle<=-35 && tempAngle>=-145)
                 cannonAngle = tempAngle;
             
-            DrawTexturePro(
-                shooters[shooterIndex],
-                (Rectangle){0,0,shooters[shooterIndex].width,shooters[shooterIndex].height},
-                (Rectangle){
-                    cannonBase.x,// cannonPos.x+50,//WIDTH / 2 - 40,
-                    cannonBase.y,// cannonPos.y+100,//HEIGHT - 130,
-                    CANNON_WIDTH,
-                    CANNON_HEIGHT
-                },
-                cannonOrigin ,cannonAngle+90,WHITE
-            );
+            if(blastAnimation<=0)
+                DrawTexturePro(
+                    shooters[shooterIndex],
+                    (Rectangle){0,0,shooters[shooterIndex].width,shooters[shooterIndex].height},
+                    (Rectangle){
+                        cannonBase.x,// cannonPos.x+50,//WIDTH / 2 - 40,
+                        cannonBase.y,// cannonPos.y+100,//HEIGHT - 130,
+                        CANNON_WIDTH,
+                        CANNON_HEIGHT
+                    },
+                    cannonOrigin ,cannonAngle+90,WHITE
+                );
+            else{
+                DrawTexturePro(
+                    blastShooters[shooterIndex],
+                    (Rectangle){0, 0, blastShooters[shooterIndex].width, blastShooters[shooterIndex].height},
+                    (Rectangle){cannonBase.x, cannonBase.y, CANNON_WIDTH, CANNON_HEIGHT},
+                    cannonOrigin,//(Vector2){CANNON_WIDTH / 2.0f, 0},
+                    cannonAngle + 90,
+                    WHITE
+                );
+                blastAnimation -= GetFrameTime();
+            }
             if (IsKeyPressed(KEY_SPACE)||IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
                 if(!shooted){
                     PlaySound(blast);
+                    blastAnimation = ANIMATION_TIME;
                     shooted=true;
                     bulletPosition.x = cannonBase.x + CANNON_HEIGHT * cos(cannonAngle * DEG2RAD) - BALLRADIUS;
                     bulletPosition.y = cannonBase.y + CANNON_HEIGHT * sin(cannonAngle * DEG2RAD) - BALLRADIUS;
@@ -641,6 +699,8 @@ int main(void)
                 bgm = &gameOverBgm;
                 PlayMusicStream(*bgm);
             }
+            SetMusicVolume(*bgm,vol);
+
             DrawText("GAME OVER", WIDTH/2 - MeasureText("GAME OVER",FONTSIZE*2)/2, 20 , FONTSIZE*2, BLACK);
             
             char high[50];
@@ -693,6 +753,8 @@ int main(void)
                 bgm = &menuBgm;
                 PlayMusicStream(*bgm);
             }
+            SetMusicVolume(*bgm,vol);
+
             if (IsKeyPressed(KEY_E))
             {
                 PlaySound(navigate);
@@ -715,12 +777,16 @@ int main(void)
         EndDrawing();
     }
 
+    // Unload all images
     UnloadTexture(bg);
     for(int i=0;i<BALLNUM;i++){
         UnloadTexture(shooters[i]);
         UnloadTexture(balls[i]);
+        UnloadTexture(blastShooters[i]);
     }
     UnloadTexture(balls[BALLNUM]);
+
+    // Unload Sound and BGM's
     UnloadMusicStream(menuBgm);
     UnloadMusicStream(gameplayResumeBgm);
     UnloadMusicStream(gameOverBgm);
