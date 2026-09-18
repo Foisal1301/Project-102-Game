@@ -12,7 +12,7 @@
 
 ## Technical Specifications
 
-- **Language:** C (C99 / C11)
+- **Language:** C
 - **Library:** [Raylib](https://www.raylib.com/) (Graphics & Audio)
 - **Window Resolution:** 800 x 600 pixels
 - **Target Frame Rate:** 60 FPS
