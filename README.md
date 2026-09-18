@@ -12,7 +12,7 @@
 
 ## Technical Specifications
 
-- **Language:** C
+- **Language:** C (C99 / C11)
 - **Library:** [Raylib](https://www.raylib.com/) (Graphics & Audio)
 - **Window Resolution:** 800 x 600 pixels
 - **Target Frame Rate:** 60 FPS
@@ -70,14 +70,21 @@ Every gameplay action and event is paired with audio cues and music tracks:
 
 ---
 
-## Developers
+##  Advisor
+
+- **Md Zim Mim Siddiqee Sowdha**  
+  Lecturer, Department of Computer Science and Engineering (CSE), BUET
+
+---
+
+##  Team Members
 
 - **Md. Foisal** - [@Foisal1301](https://github.com/Foisal1301)
 - **Shahariar Sajid Swapno** - [@SajidSwapno](https://github.com/SajidSwapno)
 
 ---
 
-## Build & Run
+##  Build & Run
 
 ### Prerequisites
 Make sure **Raylib** and a **GCC Compiler** are installed on your environment.
