@@ -19,7 +19,7 @@
 #define HOVER_FONTSIZE 60
 #define LINEGAPFORTEXT 80
 #define TEXTPOSY 200
-#define TIMEREMAINING 90
+#define TIMEREMAINING 60
 #define BGMVOLUME 2
 #define ANIMATION_TIME 0.1
 /*
@@ -477,10 +477,6 @@ int main(void)
             DrawText("BOUNCING BALL", GetScreenWidth() / 2 - MeasureText("BOUNCING BALL", FONTSIZE) / 2, 60+LINEGAPFORTEXT, FONTSIZE, TEXTCOLOR);
             DrawText("A SIMPLE BOUNCING BALL GAME MADE WITH C & RAYLIB", 10 , 200, 25, TEXTCOLOR);
             DrawText("DEVELOPERS: MD. FOISAL & SHAHARIAR SAJID SWAPNO", 10 , 200+2*LINEGAPFORTEXT*0.5, 25, TEXTCOLOR);
-            DrawText("CONTROLS", GetScreenWidth() / 2 - MeasureText("CONTROLS", FONTSIZE) / 2, 200+4*LINEGAPFORTEXT*0.5, FONTSIZE, TEXTCOLOR);
-            DrawText("SPACE/MOUSE-LEFT: SHOOT", 10 , 200+6*LINEGAPFORTEXT*0.5, 25, TEXTCOLOR);
-            DrawText("P: RESUME GAME", 10 , 200+7*LINEGAPFORTEXT*0.5, 25, TEXTCOLOR);
-            DrawText("E: BACK FROM ABOUT/LEADERBOARD PAGE", 10 , 200+8*LINEGAPFORTEXT*0.5, 25, TEXTCOLOR);
             break;
 
         case 3: // GamePlay
@@ -490,6 +486,10 @@ int main(void)
                 PlayMusicStream(*bgm);
             }
             SetMusicVolume(*bgm,vol);
+            if((int)timeRemaining==10){
+                StopMusicStream(countDown);
+                PlayMusicStream(countDown);
+            }
             if(timeRemaining<=10){
                 UpdateMusicStream(countDown);
                 SetMusicVolume(countDown,vol);
