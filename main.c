@@ -45,6 +45,7 @@ float blastAnimation;
 bool shooted;
 int high_scores[5];
 char gameOverReason[80];
+bool changeColor = false;
 void NewGame(){
     ballIndex=0;
     removedBalls=0;
@@ -53,6 +54,7 @@ void NewGame(){
     blastAnimation = 0;
     timePassed = 0;
     shooted=false;
+    changeColor=false;
     strcpy(gameOverReason,"YOU WON!");
 
     for (int i = 0; i < BALLROWS * BALLCOLS; i++)
@@ -241,6 +243,7 @@ int main(void)
     }
     // Global
     Texture2D bg = LoadTexture("assets/bg.png");
+    Texture2D logo = LoadTexture("assets/logo.png");
 
     // Menu Page
     int selectedOption = 0;
@@ -313,6 +316,10 @@ int main(void)
                 PlayMusicStream(*bgm);
             }
             SetMusicVolume(*bgm,vol);
+            DrawTexturePro(logo,
+                (Rectangle){0,0,logo.width,logo.height},
+                (Rectangle){WIDTH/6,5,WIDTH/1.5,HEIGHT/3},
+                Vector2Zero(),0,WHITE);
             if (selectedOption == 0)
             {
                 DrawText("NEW GAME", GetScreenWidth() / 2 - MeasureText("NEW GAME", HOVER_FONTSIZE) / 2, TEXTPOSY, HOVER_FONTSIZE, TEXTCOLOR); // Hover effect
@@ -493,7 +500,7 @@ int main(void)
             DrawRectangle(0,0, WIDTH, HEIGHT, Fade(BLACK, 0.3f));
             DrawText(Resumehint, (WIDTH - ResumehintWidth) / 2, 0 + HEIGHT - 20, 18, SKYBLUE);
             if(removedBalls==ballIndex||timeRemaining<0){ // GameOver
-                score+=timeRemaining*10;
+                score+=timeRemaining*100;
                 
                 if(timeRemaining<=0){
                     strcpy(gameOverReason,"GAMEOVER! TIME UP!");
@@ -591,10 +598,7 @@ int main(void)
                         
                         CheckSimpleMatches(targetIdx);
                     }
-
-                    shooterIndex = shooterIndex2;
-                    shooterIndex2 = GetRandomValue(0,BALLNUM-1);
-                    shooted = false;
+                    changeColor = true;
                     isCollision = true;
                 }
 
@@ -656,11 +660,7 @@ int main(void)
                                     }
                                 }
                             }
-
-                            shooted = false;
-
-                            shooterIndex = shooterIndex2;
-                            shooterIndex2 = GetRandomValue(0, BALLNUM - 1);
+                            changeColor = true;
                         }
                     }
                 }
@@ -671,6 +671,12 @@ int main(void)
                     (Rectangle){bulletPosition.x,bulletPosition.y,BALLRADIUS * 2, BALLRADIUS * 2},
                     Vector2Zero(),0,WHITE
                 );
+                if(changeColor){
+                    shooted = false;
+                    shooterIndex = shooterIndex2;
+                    shooterIndex2 = GetRandomValue(0, BALLNUM - 1);
+                    changeColor = false;
+                }
                 
             }
 
@@ -795,6 +801,7 @@ int main(void)
 
     // Unload all images
     UnloadTexture(bg);
+    UnloadTexture(logo);
     for(int i=0;i<BALLNUM;i++){
         UnloadTexture(shooters[i]);
         UnloadTexture(balls[i]);
