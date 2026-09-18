@@ -6,7 +6,7 @@
 
 ## Gameplay Demo
 
-> **[Watch on YouTube](https://youtu.be/OEbH2qwxCfE)** — See the gameplay mechanics and sound effects in action!
+> **[Watch on YouTube](https://youtu.be/edtzW-mmVh4)** — See the gameplay mechanics and sound effects in action!
 
 ---
 
@@ -70,7 +70,7 @@ Every gameplay action and event is paired with audio cues and music tracks:
 
 ---
 
-##  Advisor
+##  Supervisor
 
 - **Md Zim Mim Siddiqee Sowdha**  
   Lecturer, Department of Computer Science and Engineering (CSE), BUET
