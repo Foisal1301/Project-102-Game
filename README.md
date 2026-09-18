@@ -6,10 +6,6 @@
 
 ## 🎬 Gameplay Demo
 
-Check out the gameplay preview below:
-
-[![Gameplay Preview](https://img.youtube.com/vi/OEbH2qwxCfE/maxresdefault.jpg)](https://youtu.be/OEbH2qwxCfE)
-
 > 🎥 **[Watch on YouTube](https://youtu.be/OEbH2qwxCfE)** — See the gameplay mechanics and sound effects in action!
 
 ---
