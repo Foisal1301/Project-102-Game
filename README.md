@@ -1,16 +1,16 @@
-# 🎈 Bouncing Ball
+# Bouncing Ball
 
 **Bouncing Ball** is a 2D arcade-style bubble shooter game built with the C programming language and the Raylib graphics library. The objective is to shoot colored balls from a rotating cannon to clear all matching balls on the grid before time runs out or the balls cross the danger line.
 
 ---
 
-## 🎬 Gameplay Demo
+## Gameplay Demo
 
-> 🎥 **[Watch on YouTube](https://youtu.be/OEbH2qwxCfE)** — See the gameplay mechanics and sound effects in action!
+> **[Watch on YouTube](https://youtu.be/OEbH2qwxCfE)** — See the gameplay mechanics and sound effects in action!
 
 ---
 
-## 🛠️ Technical Specifications
+## Technical Specifications
 
 - **Language:** C (C99 / C11)
 - **Library:** [Raylib](https://www.raylib.com/) (Graphics & Audio)
@@ -20,12 +20,12 @@
 
 ---
 
-## 🎮 Game Rules & How to Play
+## Game Rules & How to Play
 
-### 🎯 Objective
+### Objective
 Clear the entire board of balls by aiming and shooting colored ammunition from your cannon to make matching groups.
 
-### 📜 Rules of Play
+### Rules of Play
 1. **Match-3 Mechanics:** Connect **3 or more balls** of the same color to pop them and score points.
 2. **Timer:** You start each round with **60 seconds** on the clock.
 3. **Time Bonus Ball:** Hitting special **Timer Balls** adds an extra **+10 seconds** to your remaining time.
@@ -37,7 +37,7 @@ Clear the entire board of balls by aiming and shooting colored ammunition from y
 
 ---
 
-## 🕹️ Controls
+## Controls
 
 | Key / Input | Action |
 | :--- | :--- |
@@ -50,17 +50,17 @@ Clear the entire board of balls by aiming and shooting colored ammunition from y
 
 ---
 
-## 🎵 Audio & Sound Guide
+## Audio & Sound Guide
 
 Every gameplay action and event is paired with audio cues and music tracks:
 
-### 🎼 Background Music (BGM)
+### Background Music (BGM)
 - **`menu.wav`**: Plays in the Main Menu, About, and Leaderboard screens.
 - **`Gameplay_Resume.mp3`**: Plays during active gameplay and on the Pause/Resume screen.
 - **`gameover.mp3`**: Plays on the Game Over screen after a win or loss.
 - **`countdown.wav`**: Loops as an audio alert when remaining time falls to **10 seconds or lower**.
 
-### 🔊 Sound Effects (SFX)
+### Sound Effects (SFX)
 - **`navigate.mp3`**: Triggers when pressing Arrow Keys to navigate menu options or pressing `E`/`P` keys.
 - **`Click.mp3`**: Triggers when pressing `ENTER` to confirm a menu selection.
 - **`blast.mp3`**: Plays upon firing a ball from the cannon.
@@ -70,14 +70,14 @@ Every gameplay action and event is paired with audio cues and music tracks:
 
 ---
 
-## 👥 Developers
+## Developers
 
 - **Md. Foisal** - [@Foisal1301](https://github.com/Foisal1301)
 - **Shahariar Sajid Swapno** - [@SajidSwapno](https://github.com/SajidSwapno)
 
 ---
 
-## 🚀 Build & Run
+## Build & Run
 
 ### Prerequisites
 Make sure **Raylib** and a **GCC Compiler** are installed on your environment.
