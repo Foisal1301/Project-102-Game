@@ -257,11 +257,9 @@ int main(void)
     // resume
     int selected2 = 0;
     const char *Resumehint = "[ PRESS 'P' TO PAUSE ]";
-    int ResumehintWidth = MeasureText(Resumehint, 18);
 
     // LeaderBoard & About
-    const char *backHint = "[ PRESS 'E' TO GO BACK ]";
-    int hintWidth = MeasureText(backHint, 18);
+    const char *backHint = "[ PRESS 'B' TO GO BACK ]";
 
     NewGame();
     Texture2D balls[BALLNUM+1];
@@ -467,14 +465,14 @@ int main(void)
                 PlayMusicStream(*bgm);
             }
             SetMusicVolume(*bgm,vol);
-            if (IsKeyPressed(KEY_E))
+            if (IsKeyPressed(KEY_B))
             {
                 PlaySound(navigate);
                 pageIndex = 0;
             }
 
             DrawRectangle(10, 40, WIDTH-20, HEIGHT-50, Fade(BLACK, 0.7f));
-            DrawText(backHint, (WIDTH - hintWidth) / 2, 0 + HEIGHT - 35, 18, HINTTEXTCOLOR);
+            DrawText(backHint, (WIDTH - MeasureText(backHint, FONTSIZE/2)) / 2, HEIGHT - 35, FONTSIZE/2, HINTTEXTCOLOR);
             DrawText("ABOUT", GetScreenWidth() / 2 - MeasureText("ABOUT", HOVER_FONTSIZE) / 2, 60, HOVER_FONTSIZE, TEXTCOLOR);
             DrawText("BOUNCING BALL", GetScreenWidth() / 2 - MeasureText("BOUNCING BALL", FONTSIZE) / 2, 60+LINEGAPFORTEXT, FONTSIZE, TEXTCOLOR);
             DrawText("A SIMPLE BOUNCING BALL GAME MADE WITH C & RAYLIB", 10 , TEXTPOSY, 25, TEXTCOLOR);
@@ -499,7 +497,7 @@ int main(void)
             timeRemaining -= GetFrameTime();
             timePassed+= GetFrameTime();
             DrawRectangle(0,0, WIDTH, HEIGHT, Fade(BLACK, 0.3f));
-            DrawText(Resumehint, (WIDTH - ResumehintWidth) / 2, 0 + HEIGHT - 20, 18, HINTTEXTCOLOR);
+            DrawText(Resumehint, (WIDTH - MeasureText(Resumehint, FONTSIZE/2)) / 2,HEIGHT - 20, FONTSIZE/2, HINTTEXTCOLOR);
             if(removedBalls==ballIndex||timeRemaining<0){ // GameOver
                 score+=timeRemaining*100;
                 
@@ -778,14 +776,14 @@ int main(void)
             }
             SetMusicVolume(*bgm,vol);
 
-            if (IsKeyPressed(KEY_E))
+            if (IsKeyPressed(KEY_B))
             {
                 PlaySound(navigate);
                 pageIndex = 0;
             }
             DrawRectangle(10, 40, WIDTH-20, HEIGHT-50, Fade(BLACK, 0.7f));
             DrawText("LEADERBOARD", GetScreenWidth() / 2 - MeasureText("LEADERBOARD", HOVER_FONTSIZE) / 2, 60, HOVER_FONTSIZE, TEXTCOLOR);
-            DrawText(backHint, (WIDTH - hintWidth) / 2, 0 + HEIGHT - 35, 18, HINTTEXTCOLOR);
+            DrawText(backHint, (WIDTH - MeasureText(backHint, FONTSIZE/2)) / 2, 0 + HEIGHT - 35, 18, HINTTEXTCOLOR);
 
             for(int i=0;i<5;i++){
                 char rankText[20],scoreText[20];
