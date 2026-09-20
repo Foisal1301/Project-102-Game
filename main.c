@@ -8,6 +8,12 @@
 #define HEIGHT 600
 #define WIDTH 800
 #define TEXTCOLOR RAYWHITE
+#define TEXTCOLOR2 BLACK
+#define HINTTEXTCOLOR SKYBLUE
+#define FONTSIZE 40
+#define HOVER_FONTSIZE 60
+#define LINEGAPFORTEXT 80
+#define TEXTPOSY 200
 #define BALLROWS 16
 #define BALLCOLS 14
 #define BALLNUM 3
@@ -15,10 +21,6 @@
 #define CANNON_HEIGHT 120
 #define CANNON_WIDTH 80
 #define VELOCITY_OF_BULLET 20
-#define FONTSIZE 40
-#define HOVER_FONTSIZE 60
-#define LINEGAPFORTEXT 80
-#define TEXTPOSY 200
 #define TIMEREMAINING 75
 #define BGMVOLUME 2
 #define ANIMATION_TIME 0.1
@@ -410,33 +412,33 @@ int main(void)
             SetMusicVolume(*bgm,vol);
             // resume,new game,exit
             if(selected2==0){
-                DrawText("RESUME",WIDTH/2 - MeasureText("RESUME",HOVER_FONTSIZE)/2,200,HOVER_FONTSIZE,TEXTCOLOR);
+                DrawText("RESUME",WIDTH/2 - MeasureText("RESUME",HOVER_FONTSIZE)/2,TEXTPOSY,HOVER_FONTSIZE,TEXTCOLOR);
             }else{
-                DrawText("RESUME",WIDTH/2 - MeasureText("RESUME",FONTSIZE)/2,200,FONTSIZE,TEXTCOLOR);
+                DrawText("RESUME",WIDTH/2 - MeasureText("RESUME",FONTSIZE)/2,TEXTPOSY,FONTSIZE,TEXTCOLOR);
             }
 
             if(selected2==1){
-                DrawText("NEW GAME",WIDTH/2 - MeasureText("NEW GAME",HOVER_FONTSIZE)/2,200+LINEGAPFORTEXT,HOVER_FONTSIZE,TEXTCOLOR);
+                DrawText("NEW GAME",WIDTH/2 - MeasureText("NEW GAME",HOVER_FONTSIZE)/2,TEXTPOSY+LINEGAPFORTEXT,HOVER_FONTSIZE,TEXTCOLOR);
             }else{
-                DrawText("NEW GAME",WIDTH/2 - MeasureText("NEW GAME",FONTSIZE)/2,200+LINEGAPFORTEXT,FONTSIZE,TEXTCOLOR);
+                DrawText("NEW GAME",WIDTH/2 - MeasureText("NEW GAME",FONTSIZE)/2,TEXTPOSY+LINEGAPFORTEXT,FONTSIZE,TEXTCOLOR);
             }
 
             if(selected2==2){
-                DrawText("MAIN MENU",WIDTH/2 - MeasureText("MAIN MENU",HOVER_FONTSIZE)/2,200+2*LINEGAPFORTEXT,HOVER_FONTSIZE,TEXTCOLOR);
+                DrawText("MAIN MENU",WIDTH/2 - MeasureText("MAIN MENU",HOVER_FONTSIZE)/2,TEXTPOSY+2*LINEGAPFORTEXT,HOVER_FONTSIZE,TEXTCOLOR);
             }else{
-                DrawText("MAIN MENU",WIDTH/2 - MeasureText("MAIN MENU",FONTSIZE)/2,200+2*LINEGAPFORTEXT,FONTSIZE,TEXTCOLOR);
+                DrawText("MAIN MENU",WIDTH/2 - MeasureText("MAIN MENU",FONTSIZE)/2,TEXTPOSY+2*LINEGAPFORTEXT,FONTSIZE,TEXTCOLOR);
             }
 
             if(selected2==3){
-                DrawText(vol_text,WIDTH/2 - MeasureText(vol_text,HOVER_FONTSIZE)/2,200+3*LINEGAPFORTEXT,HOVER_FONTSIZE,TEXTCOLOR);
+                DrawText(vol_text,WIDTH/2 - MeasureText(vol_text,HOVER_FONTSIZE)/2,TEXTPOSY+3*LINEGAPFORTEXT,HOVER_FONTSIZE,TEXTCOLOR);
             }else{
-                DrawText(vol_text,WIDTH/2 - MeasureText(vol_text,FONTSIZE)/2,200+3*LINEGAPFORTEXT,FONTSIZE,TEXTCOLOR);
+                DrawText(vol_text,WIDTH/2 - MeasureText(vol_text,FONTSIZE)/2,TEXTPOSY+3*LINEGAPFORTEXT,FONTSIZE,TEXTCOLOR);
             }
 
             if(selected2==4){
-                DrawText("EXIT",WIDTH/2 - MeasureText("EXIT",HOVER_FONTSIZE)/2,200+4*LINEGAPFORTEXT,HOVER_FONTSIZE,TEXTCOLOR);
+                DrawText("EXIT",WIDTH/2 - MeasureText("EXIT",HOVER_FONTSIZE)/2,TEXTPOSY+4*LINEGAPFORTEXT,HOVER_FONTSIZE,TEXTCOLOR);
             }else{
-                DrawText("EXIT",WIDTH/2 - MeasureText("EXIT",FONTSIZE)/2,200+4*LINEGAPFORTEXT,FONTSIZE,TEXTCOLOR);
+                DrawText("EXIT",WIDTH/2 - MeasureText("EXIT",FONTSIZE)/2,TEXTPOSY+4*LINEGAPFORTEXT,FONTSIZE,TEXTCOLOR);
             }
 
             if (IsKeyPressed(KEY_UP) && selected2>0) selected2--;
@@ -472,11 +474,11 @@ int main(void)
             }
 
             DrawRectangle(10, 40, WIDTH-20, HEIGHT-50, Fade(BLACK, 0.7f));
-            DrawText(backHint, (WIDTH - hintWidth) / 2, 0 + HEIGHT - 35, 18, SKYBLUE);
+            DrawText(backHint, (WIDTH - hintWidth) / 2, 0 + HEIGHT - 35, 18, HINTTEXTCOLOR);
             DrawText("ABOUT", GetScreenWidth() / 2 - MeasureText("ABOUT", HOVER_FONTSIZE) / 2, 60, HOVER_FONTSIZE, TEXTCOLOR);
             DrawText("BOUNCING BALL", GetScreenWidth() / 2 - MeasureText("BOUNCING BALL", FONTSIZE) / 2, 60+LINEGAPFORTEXT, FONTSIZE, TEXTCOLOR);
-            DrawText("A SIMPLE BOUNCING BALL GAME MADE WITH C & RAYLIB", 10 , 200, 25, TEXTCOLOR);
-            DrawText("DEVELOPERS: MD. FOISAL & SHAHARIAR SAJID SWAPNO", 10 , 200+2*LINEGAPFORTEXT*0.5, 25, TEXTCOLOR);
+            DrawText("A SIMPLE BOUNCING BALL GAME MADE WITH C & RAYLIB", 10 , TEXTPOSY, 25, TEXTCOLOR);
+            DrawText("DEVELOPERS: MD. FOISAL & SHAHARIAR SAJID SWAPNO", 10 , TEXTPOSY+2*LINEGAPFORTEXT*0.5, 25, TEXTCOLOR);
             break;
 
         case 3: // GamePlay
@@ -492,13 +494,12 @@ int main(void)
             }
             if(timeRemaining<=10){
                 UpdateMusicStream(countDown);
-                SetMusicVolume(countDown,vol);
             }
 
             timeRemaining -= GetFrameTime();
             timePassed+= GetFrameTime();
             DrawRectangle(0,0, WIDTH, HEIGHT, Fade(BLACK, 0.3f));
-            DrawText(Resumehint, (WIDTH - ResumehintWidth) / 2, 0 + HEIGHT - 20, 18, SKYBLUE);
+            DrawText(Resumehint, (WIDTH - ResumehintWidth) / 2, 0 + HEIGHT - 20, 18, HINTTEXTCOLOR);
             if(removedBalls==ballIndex||timeRemaining<0){ // GameOver
                 score+=timeRemaining*100;
                 
@@ -723,34 +724,34 @@ int main(void)
             StopMusicStream(countDown);
             SetMusicVolume(*bgm,vol);
 
-            DrawText(gameOverReason, WIDTH/2 - MeasureText(gameOverReason,FONTSIZE)/2, 20 , FONTSIZE, BLACK);
+            DrawText(gameOverReason, WIDTH/2 - MeasureText(gameOverReason,FONTSIZE)/2, 20 , FONTSIZE, TEXTCOLOR2);
             
             char high[50];
             sprintf(high,"HIGH SCORE: %d",high_scores[0]);
-            DrawText(high, WIDTH/2 - MeasureText(high,FONTSIZE)/2, 120 , FONTSIZE, BLACK);
+            DrawText(high, WIDTH/2 - MeasureText(high,FONTSIZE)/2, 120 , FONTSIZE, TEXTCOLOR2);
             
-            DrawText(scores, WIDTH/2 - MeasureText(scores,FONTSIZE)/2, 200 , FONTSIZE, BLACK);
+            DrawText(scores, WIDTH/2 - MeasureText(scores,FONTSIZE)/2, TEXTPOSY , FONTSIZE, TEXTCOLOR2);
             char timeText[100];
             sprintf(timeText,"TIME: %.0f S",timePassed);
-            DrawText(timeText, WIDTH/2 - MeasureText(timeText,FONTSIZE)/2, 200+LINEGAPFORTEXT , FONTSIZE, BLACK);
+            DrawText(timeText, WIDTH/2 - MeasureText(timeText,FONTSIZE)/2, TEXTPOSY+LINEGAPFORTEXT , FONTSIZE, TEXTCOLOR2);
 
             if(selected==0){
-                DrawText("NEW GAME", 135 - MeasureText("NEW GAME",HOVER_FONTSIZE/1.5)/2, 360 , HOVER_FONTSIZE/1.5, TEXTCOLOR);
+                DrawText("NEW GAME", 135 - MeasureText("NEW GAME",HOVER_FONTSIZE/1.5)/2, TEXTPOSY+2*LINEGAPFORTEXT , HOVER_FONTSIZE/1.5, TEXTCOLOR);
                 
             }else{
-                DrawText("NEW GAME", 135 - MeasureText("NEW GAME",FONTSIZE/1.5)/2, 360 , FONTSIZE/1.5, TEXTCOLOR);
+                DrawText("NEW GAME", 135 - MeasureText("NEW GAME",FONTSIZE/1.5)/2, TEXTPOSY+2*LINEGAPFORTEXT , FONTSIZE/1.5, TEXTCOLOR);
             }
 
             if(selected==1){
-                DrawText("LEADERBOARD", WIDTH/2 - MeasureText("LEADERBOARD",HOVER_FONTSIZE/1.5)/2, 360 , HOVER_FONTSIZE/1.5, TEXTCOLOR);
+                DrawText("LEADERBOARD", WIDTH/2 - MeasureText("LEADERBOARD",HOVER_FONTSIZE/1.5)/2, TEXTPOSY+2*LINEGAPFORTEXT , HOVER_FONTSIZE/1.5, TEXTCOLOR);
             }else{
-                DrawText("LEADERBOARD", WIDTH/2 - MeasureText("LEADERBOARD",FONTSIZE/1.5)/2, 360 , FONTSIZE/1.5, TEXTCOLOR);
+                DrawText("LEADERBOARD", WIDTH/2 - MeasureText("LEADERBOARD",FONTSIZE/1.5)/2, TEXTPOSY+2*LINEGAPFORTEXT , FONTSIZE/1.5, TEXTCOLOR);
             }
 
             if(selected==2){
-                DrawText("EXIT", 650 - MeasureText("EXIT",HOVER_FONTSIZE/1.5)/2, 360 , HOVER_FONTSIZE/1.5, TEXTCOLOR);
+                DrawText("EXIT", 650 - MeasureText("EXIT",HOVER_FONTSIZE/1.5)/2, TEXTPOSY+2*LINEGAPFORTEXT , HOVER_FONTSIZE/1.5, TEXTCOLOR);
             }else{
-                DrawText("EXIT", 650 - MeasureText("EXIT",FONTSIZE/1.5)/2, 360 , FONTSIZE/1.5, TEXTCOLOR);
+                DrawText("EXIT", 650 - MeasureText("EXIT",FONTSIZE/1.5)/2, TEXTPOSY+2*LINEGAPFORTEXT , FONTSIZE/1.5, TEXTCOLOR);
             }
 
             if(IsKeyPressed(KEY_LEFT)&&selected>0) selected--;
@@ -784,7 +785,7 @@ int main(void)
             }
             DrawRectangle(10, 40, WIDTH-20, HEIGHT-50, Fade(BLACK, 0.7f));
             DrawText("LEADERBOARD", GetScreenWidth() / 2 - MeasureText("LEADERBOARD", HOVER_FONTSIZE) / 2, 60, HOVER_FONTSIZE, TEXTCOLOR);
-            DrawText(backHint, (WIDTH - hintWidth) / 2, 0 + HEIGHT - 35, 18, SKYBLUE);
+            DrawText(backHint, (WIDTH - hintWidth) / 2, 0 + HEIGHT - 35, 18, HINTTEXTCOLOR);
 
             for(int i=0;i<5;i++){
                 char rankText[20],scoreText[20];
@@ -793,7 +794,6 @@ int main(void)
                 DrawText(rankText, 200, 150+i*LINEGAPFORTEXT, FONTSIZE/1.25, TEXTCOLOR);
                 DrawText(scoreText, 500, 150+i*LINEGAPFORTEXT, FONTSIZE/1.25, TEXTCOLOR);
             }
-            
             break;
         }
         EndDrawing();
