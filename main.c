@@ -101,8 +101,9 @@ void NewGame()
     }
 }
 
-void GameOver()
+void GameOver(bool isWin)
 {
+    if(!isWin) score /= 2;
     pageIndex = 4;
 
     int index = -1;
@@ -786,10 +787,12 @@ int main(void)
                 {
                     strcpy(gameOverReason, "GAMEOVER! TIME UP!");
                     PlaySound(gameover);
+                    GameOver(false);
                 }
-                else
+                else{
                     PlaySound(winSound);
-                GameOver();
+                    GameOver(true);
+                }
             }
             if (IsKeyPressed(KEY_P))
             {
@@ -985,7 +988,7 @@ int main(void)
                                         pageIndex = 4;
                                         PlaySound(gameover);
                                         strcpy(gameOverReason, "GAMEOVER! YOU CROSSED THE LINE!");
-                                        GameOver();
+                                        GameOver(false);
                                     }
                                 }
                             }
