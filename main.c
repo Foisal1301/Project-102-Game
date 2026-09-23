@@ -24,7 +24,7 @@
 #define TIMEREMAINING 75
 #define BGMVOLUME 2
 #define ANIMATION_TIME 0.1
-#define g 3
+#define g 2.5
 /*
 Pages
 0 => Start
@@ -273,11 +273,12 @@ bool CheckSimpleMatches(int hitIndex)
             if (!falling[idx])
             {
                 existedBalls[idx] = (Rectangle){0, 0, 0, 0};
+                falling[idx] = false;
                 downFallVelocity[idx] = 0;
                 removedBalls++;
             }
         }
-        score += count * 10;
+        
         isVanished = true;
     }
     return isVanished;
@@ -738,6 +739,7 @@ int main(void)
             break;
 
         case 3: // GamePlay
+            score = removedBalls * 10;
             if (bgm != &gameplayResumeBgm)
             {
                 StopMusicStream(*bgm);
@@ -881,6 +883,14 @@ int main(void)
                         ballIndex++;
 
                         CheckSimpleMatches(targetIdx);
+
+                        for (int i = 0; i < BALLROWS * BALLCOLS; i++)
+                        {
+                            if (existedBalls[i].width > 0)
+                            {
+                                CheckDownfall(i);
+                            }
+                        }
                     }
                     changeColor = true;
                     isCollision = true;
@@ -902,7 +912,7 @@ int main(void)
                                 shootedCenter,
                                 BALLRADIUS - 8,
                                 existedCenter,
-                                BALLRADIUS))
+                                BALLRADIUS) && falling[i] != true)
                         {
                             isCollision = true;
 
@@ -962,7 +972,7 @@ int main(void)
                                     ballIndex++;
                                     bool isVanished = CheckSimpleMatches(targetIdx);
 
-                                    for (int i = 0; i < BALLROWS * BALLCOLS; i++)
+                                    for (int i = 0; i < BALLROWS * BALLCOLS && isVanished; i++)
                                     {
                                         if (existedBalls[i].width > 0)
                                         {
