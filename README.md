@@ -6,7 +6,7 @@
 
 ## Gameplay Demo & Screenshots
 
-> **[Watch on YouTube](https://youtu.be/edtzW-mmVh4)** — See the gameplay mechanics and sound effects in action!
+> **[Watch on YouTube](https://youtu.be/oBctFhi_xqM)** — See the gameplay mechanics and sound effects in action!
 
 ### Screenshots
 
