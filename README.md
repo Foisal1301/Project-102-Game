@@ -10,7 +10,7 @@
 
 ### Screenshots
 
-| Main Menu | Gameplay |
+| Main Menu | Leaderboard |
 | :---: | :---: |
 | ![Main Menu](examples/MENU.png) | ![Leaderboard](examples/leaderboard.png) |
 
@@ -18,7 +18,7 @@
 | :---: | :---: |
 | ![Pause Screen](examples/RESUME.png) | ![Game Over](examples/gameover.png) |
 
-| Leaderboard |
+| Gameplay |
 | :---: |
 | ![Gameplay](examples/gameplay.png) |
 
