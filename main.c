@@ -134,10 +134,10 @@ void setBalls()
                 BALLRADIUS * 2,
                 BALLRADIUS * 2};
 
-            int probabilityForTimeBall = GetRandomValue(0, 15);
-            if (probabilityForTimeBall < level + 1)
+            int probabilityForTimeBall = GetRandomValue(0, 50);
+            if (probabilityForTimeBall < level + 2)
                 randBallIdx[i * BALLCOLS + j] = 4;
-            else if (probabilityForTimeBall == 10)
+            else if (probabilityForTimeBall == 10||probabilityForTimeBall == 11)
                 randBallIdx[i * BALLCOLS + j] = 3;
             else
                 randBallIdx[i * BALLCOLS + j] = GetRandomValue(0, 2);
