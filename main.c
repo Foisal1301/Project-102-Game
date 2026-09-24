@@ -11,8 +11,8 @@
 #define TEXTCOLOR2 BLACK
 #define HINTTEXTCOLOR SKYBLUE
 #define FONTSIZE 40
-#define HOVER_FONTSIZE 60
-#define LINEGAPFORTEXT 80
+#define HOVER_FONTSIZE 50
+#define LINEGAPFORTEXT 60
 #define TEXTPOSY 200
 #define BALLROWS 16
 #define BALLCOLS 14
@@ -29,16 +29,17 @@
 Pages
 0 => Start
 1 => Resume
-2 => About
+2 => HOWTOPLAY
 3 => GamePlay
 4 => GameOver
 5 => LeaderBoard
 6 => Level
+7 => credit
 */
 Rectangle existedBalls[BALLROWS * BALLCOLS];
 int randBallIdx[BALLROWS * BALLCOLS];
 int downFallVelocity[BALLROWS * BALLCOLS] = {0}; // Dropping ball feature
-bool falling[BALLROWS * BALLCOLS] = {false};// Dropping ball feature
+bool falling[BALLROWS * BALLCOLS] = {false};     // Dropping ball feature
 int ballXadd = 0, ballYadd = 0;
 int ballIndex = 0;
 int removedBalls = 0;
@@ -54,7 +55,8 @@ char gameOverReason[80];
 bool changeColor = false;
 int level = 0;
 
-void loadHighScore(int lvl){
+void loadHighScore(int lvl)
+{
     FILE *file;
     switch (lvl)
     {
@@ -68,7 +70,7 @@ void loadHighScore(int lvl){
         file = fopen("hardScore.txt", "r");
         break;
     }
-    
+
     if (file != NULL)
     {
         for (int i = 0; i < 5; i++)
@@ -111,7 +113,8 @@ void loadHighScore(int lvl){
     }
 }
 
-void setBalls(){
+void setBalls()
+{
     for (int i = 0; i < initialBallRows + level; i++)
     {
         for (int j = 0; j < BALLCOLS; j++)
@@ -167,7 +170,8 @@ void NewGame()
 
 void GameOver(bool isWin)
 {
-    if(!isWin) score /= 2;
+    if (!isWin)
+        score /= 2;
     pageIndex = 4;
 
     int index = -1;
@@ -355,7 +359,7 @@ bool CheckSimpleMatches(int hitIndex)
                 removedBalls++;
             }
         }
-        
+
         isVanished = true;
     }
     return isVanished;
@@ -390,7 +394,8 @@ int main(void)
 
     // score
     // easy
-    for(int i=0;i<=2;i++) loadHighScore(i);
+    for (int i = 0; i <= 2; i++)
+        loadHighScore(i);
     // Global
     Texture2D bg = LoadTexture("assets/bg.png");
     Texture2D logo = LoadTexture("assets/logo.png");
@@ -415,7 +420,6 @@ int main(void)
     // LeaderBoard & About
     const char *backHint = "[ PRESS 'B' TO GO BACK ]";
 
-    
     Texture2D balls[BALLNUM + 2];
 
     for (int i = 0; i < BALLNUM; i++)
@@ -483,41 +487,64 @@ int main(void)
                            (Rectangle){WIDTH / 6, 5, WIDTH / 1.5, HEIGHT / 3},
                            Vector2Zero(), 0, WHITE);
 
-            Rectangle NGbutton = {GetScreenWidth() / 2 - MeasureText("NEW GAME", FONTSIZE) / 2, TEXTPOSY, MeasureText("NEW GAME", FONTSIZE), MeasureTextEx(GetFontDefault(),"NEW GAME",FONTSIZE,2).y};
-            Rectangle Abutton = {GetScreenWidth() / 2 - MeasureText("ABOUT", FONTSIZE) / 2, TEXTPOSY + LINEGAPFORTEXT, MeasureText("ABOUT", FONTSIZE), MeasureTextEx(GetFontDefault(),"ABOUT",FONTSIZE,2).y};
-            Rectangle LDbutton = {GetScreenWidth() / 2 - MeasureText("LEADERBOARD", FONTSIZE) / 2, TEXTPOSY + 2 * LINEGAPFORTEXT, MeasureText("LEADERBOARD", FONTSIZE), MeasureTextEx(GetFontDefault(),"LEADERBOARD",FONTSIZE,2).y};
-            Rectangle VLbutton = {GetScreenWidth() / 2 - MeasureText(vol_text, FONTSIZE) / 2, TEXTPOSY + 3 * LINEGAPFORTEXT, MeasureText(vol_text, FONTSIZE), MeasureTextEx(GetFontDefault(),vol_text,FONTSIZE,2).y};
-            Rectangle Ebutton = {GetScreenWidth() / 2 - MeasureText("EXIT", FONTSIZE) / 2, TEXTPOSY + 4 * LINEGAPFORTEXT, MeasureText("EXIT", FONTSIZE), MeasureTextEx(GetFontDefault(),"EXIT",FONTSIZE,2).y};
+            Rectangle NGbutton = {GetScreenWidth() / 2 - MeasureText("NEW GAME", FONTSIZE) / 2, TEXTPOSY, MeasureText("NEW GAME", FONTSIZE), MeasureTextEx(GetFontDefault(), "NEW GAME", FONTSIZE, 2).y};
+            Rectangle Abutton = {GetScreenWidth() / 2 - MeasureText("ABOUT", FONTSIZE) / 2, TEXTPOSY + LINEGAPFORTEXT, MeasureText("ABOUT", FONTSIZE), MeasureTextEx(GetFontDefault(), "ABOUT", FONTSIZE, 2).y};
+            Rectangle LDbutton = {GetScreenWidth() / 2 - MeasureText("LEADERBOARD", FONTSIZE) / 2, TEXTPOSY + 2 * LINEGAPFORTEXT, MeasureText("LEADERBOARD", FONTSIZE), MeasureTextEx(GetFontDefault(), "LEADERBOARD", FONTSIZE, 2).y};
+            Rectangle VLbutton = {GetScreenWidth() / 2 - MeasureText(vol_text, FONTSIZE) / 2, TEXTPOSY + 3 * LINEGAPFORTEXT, MeasureText(vol_text, FONTSIZE), MeasureTextEx(GetFontDefault(), vol_text, FONTSIZE, 2).y};
+            Rectangle Cbutton = {GetScreenWidth() / 2 - MeasureText("CREDITS", FONTSIZE) / 2, TEXTPOSY + 4 * LINEGAPFORTEXT, MeasureText("CREDITS", FONTSIZE), MeasureTextEx(GetFontDefault(), "CREDITS", FONTSIZE, 2).y};
+            Rectangle Ebutton = {GetScreenWidth() / 2 - MeasureText("EXIT", FONTSIZE) / 2, TEXTPOSY + 5 * LINEGAPFORTEXT, MeasureText("EXIT", FONTSIZE), MeasureTextEx(GetFontDefault(), "EXIT", FONTSIZE, 2).y};
 
-            if (CheckCollisionPointRec(GetMousePosition(), NGbutton)) selectedOption = 0;
-            if (CheckCollisionPointRec(GetMousePosition(), Abutton)) selectedOption = 1;
-            if (CheckCollisionPointRec(GetMousePosition(), LDbutton)) selectedOption = 2;
-            if (CheckCollisionPointRec(GetMousePosition(), VLbutton)) selectedOption = 3;
-            if (CheckCollisionPointRec(GetMousePosition(), Ebutton)) selectedOption = 4;
+            if (CheckCollisionPointRec(GetMousePosition(), NGbutton))
+                selectedOption = 0;
+            if (CheckCollisionPointRec(GetMousePosition(), Abutton))
+                selectedOption = 1;
+            if (CheckCollisionPointRec(GetMousePosition(), LDbutton))
+                selectedOption = 2;
+            if (CheckCollisionPointRec(GetMousePosition(), VLbutton))
+                selectedOption = 3;
+            if (CheckCollisionPointRec(GetMousePosition(), Cbutton))
+                selectedOption = 4;
+            if (CheckCollisionPointRec(GetMousePosition(), Ebutton))
+                selectedOption = 5;
 
-            if (selectedOption == 0) DrawText("NEW GAME", GetScreenWidth() / 2 - MeasureText("NEW GAME", HOVER_FONTSIZE) / 2, TEXTPOSY, HOVER_FONTSIZE, TEXTCOLOR); // Hover effect
-            else DrawText("NEW GAME", GetScreenWidth() / 2 - MeasureText("NEW GAME", FONTSIZE) / 2, TEXTPOSY, FONTSIZE, TEXTCOLOR);
+            if (selectedOption == 0)
+                DrawText("NEW GAME", GetScreenWidth() / 2 - MeasureText("NEW GAME", HOVER_FONTSIZE) / 2, TEXTPOSY, HOVER_FONTSIZE, TEXTCOLOR); // Hover effect
+            else
+                DrawText("NEW GAME", GetScreenWidth() / 2 - MeasureText("NEW GAME", FONTSIZE) / 2, TEXTPOSY, FONTSIZE, TEXTCOLOR);
 
-            if (selectedOption == 1) DrawText("ABOUT", GetScreenWidth() / 2 - MeasureText("ABOUT", HOVER_FONTSIZE) / 2, TEXTPOSY + LINEGAPFORTEXT, HOVER_FONTSIZE, TEXTCOLOR); // Hover effect
-            else DrawText("ABOUT", GetScreenWidth() / 2 - MeasureText("ABOUT", FONTSIZE) / 2, TEXTPOSY + LINEGAPFORTEXT, FONTSIZE, TEXTCOLOR);
+            if (selectedOption == 1)
+                DrawText("HOW TO PLAY", GetScreenWidth() / 2 - MeasureText("HOW TO PLAY", HOVER_FONTSIZE) / 2, TEXTPOSY + LINEGAPFORTEXT, HOVER_FONTSIZE, TEXTCOLOR); // Hover effect
+            else
+                DrawText("HOW TO PLAY", GetScreenWidth() / 2 - MeasureText("HOW TO PLAY", FONTSIZE) / 2, TEXTPOSY + LINEGAPFORTEXT, FONTSIZE, TEXTCOLOR);
 
-            if (selectedOption == 2) DrawText("LEADERBOARD", GetScreenWidth() / 2 - MeasureText("LEADERBOARD", HOVER_FONTSIZE) / 2, TEXTPOSY + 2 * LINEGAPFORTEXT, HOVER_FONTSIZE, TEXTCOLOR); // Hover effect
-            else DrawText("LEADERBOARD", GetScreenWidth() / 2 - MeasureText("LEADERBOARD", FONTSIZE) / 2, TEXTPOSY + 2 * LINEGAPFORTEXT, FONTSIZE, TEXTCOLOR);
+            if (selectedOption == 2)
+                DrawText("LEADERBOARD", GetScreenWidth() / 2 - MeasureText("LEADERBOARD", HOVER_FONTSIZE) / 2, TEXTPOSY + 2 * LINEGAPFORTEXT, HOVER_FONTSIZE, TEXTCOLOR); // Hover effect
+            else
+                DrawText("LEADERBOARD", GetScreenWidth() / 2 - MeasureText("LEADERBOARD", FONTSIZE) / 2, TEXTPOSY + 2 * LINEGAPFORTEXT, FONTSIZE, TEXTCOLOR);
 
-            if (selectedOption == 3) DrawText(vol_text, GetScreenWidth() / 2 - MeasureText(vol_text, HOVER_FONTSIZE) / 2, TEXTPOSY + 3 * LINEGAPFORTEXT, HOVER_FONTSIZE, TEXTCOLOR); // Hover effect
-            else DrawText(vol_text, GetScreenWidth() / 2 - MeasureText(vol_text, FONTSIZE) / 2, TEXTPOSY + 3 * LINEGAPFORTEXT, FONTSIZE, TEXTCOLOR);
+            if (selectedOption == 3)
+                DrawText(vol_text, GetScreenWidth() / 2 - MeasureText(vol_text, HOVER_FONTSIZE) / 2, TEXTPOSY + 3 * LINEGAPFORTEXT, HOVER_FONTSIZE, TEXTCOLOR); // Hover effect
+            else
+                DrawText(vol_text, GetScreenWidth() / 2 - MeasureText(vol_text, FONTSIZE) / 2, TEXTPOSY + 3 * LINEGAPFORTEXT, FONTSIZE, TEXTCOLOR);
 
-            if (selectedOption == 4) DrawText("EXIT", GetScreenWidth() / 2 - MeasureText("EXIT", HOVER_FONTSIZE) / 2, TEXTPOSY + 4 * LINEGAPFORTEXT, HOVER_FONTSIZE, TEXTCOLOR); // Hover effect
-            else DrawText("EXIT", GetScreenWidth() / 2 - MeasureText("EXIT", FONTSIZE) / 2, TEXTPOSY + 4 * LINEGAPFORTEXT, FONTSIZE, TEXTCOLOR);
+            if (selectedOption == 4)
+                DrawText("CREDITS", GetScreenWidth() / 2 - MeasureText("CREDITS", HOVER_FONTSIZE) / 2, TEXTPOSY + 4 * LINEGAPFORTEXT, HOVER_FONTSIZE, TEXTCOLOR); // Hover effect
+            else
+                DrawText("CREDITS", GetScreenWidth() / 2 - MeasureText("CREDITS", FONTSIZE) / 2, TEXTPOSY + 4 * LINEGAPFORTEXT, FONTSIZE, TEXTCOLOR);
+
+            if (selectedOption == 5)
+                DrawText("EXIT", GetScreenWidth() / 2 - MeasureText("EXIT", HOVER_FONTSIZE) / 2, TEXTPOSY + 5 * LINEGAPFORTEXT, HOVER_FONTSIZE, TEXTCOLOR); // Hover effect
+            else
+                DrawText("EXIT", GetScreenWidth() / 2 - MeasureText("EXIT", FONTSIZE) / 2, TEXTPOSY + 5 * LINEGAPFORTEXT, FONTSIZE, TEXTCOLOR);
 
             if (IsKeyPressed(KEY_UP) && selectedOption > 0)
                 selectedOption--;
 
-            if (IsKeyPressed(KEY_DOWN) && selectedOption < 4)
+            if (IsKeyPressed(KEY_DOWN) && selectedOption < 5)
                 selectedOption++;
 
             // Page Shifting
-            if (IsKeyPressed(KEY_ENTER)||IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
+            if (IsKeyPressed(KEY_ENTER) || IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
             {
                 switch (selectedOption)
                 {
@@ -526,7 +553,7 @@ int main(void)
                     pageIndex = 6;
                     break;
 
-                case 1: // About
+                case 1: // HOW TO PLAY
                     selectedOption = 0;
                     pageIndex = 2;
                     break;
@@ -541,7 +568,12 @@ int main(void)
                     else
                         vol = 0;
                     break;
-                case 4: // Exit
+
+                case 4: // credits
+                    selectedOption = 0;
+                    pageIndex = 7;
+                    break;
+                case 5: // Exit
                     selectedOption = 0;
                     exit = 1;
                     break;
@@ -560,44 +592,61 @@ int main(void)
             SetMusicVolume(*bgm, vol);
             // resume,new game,mainmenu,volume,exit
 
-            Rectangle Rbutton = {GetScreenWidth() / 2 - MeasureText("RESUME", FONTSIZE) / 2, TEXTPOSY, MeasureText("RESUME", FONTSIZE), MeasureTextEx(GetFontDefault(),"RESUME",FONTSIZE,2).y};
-            Rectangle NGutton2 = {GetScreenWidth() / 2 - MeasureText("NEW GAME", FONTSIZE) / 2, TEXTPOSY + LINEGAPFORTEXT, MeasureText("NEW GAME", FONTSIZE), MeasureTextEx(GetFontDefault(),"NEW GAME",FONTSIZE,2).y};
-            Rectangle MMbutton = {GetScreenWidth() / 2 - MeasureText("MAIN MENU", FONTSIZE) / 2, TEXTPOSY + 2 * LINEGAPFORTEXT, MeasureText("MAIN MENU", FONTSIZE), MeasureTextEx(GetFontDefault(),"MAIN MENU",FONTSIZE,2).y};
-            Rectangle VLbutton2 = {GetScreenWidth() / 2 - MeasureText(vol_text, FONTSIZE) / 2, TEXTPOSY + 3 * LINEGAPFORTEXT, MeasureText(vol_text, HOVER_FONTSIZE), MeasureTextEx(GetFontDefault(),vol_text,FONTSIZE,2).y};
-            Rectangle Ebutton2 = {GetScreenWidth() / 2 - MeasureText("EXIT", FONTSIZE) / 2, TEXTPOSY + 4 * LINEGAPFORTEXT, MeasureText("EXIT", FONTSIZE), MeasureTextEx(GetFontDefault(),"EXIT",FONTSIZE,2).y};
+            Rectangle Rbutton = {GetScreenWidth() / 2 - MeasureText("RESUME", FONTSIZE) / 2, TEXTPOSY, MeasureText("RESUME", FONTSIZE), MeasureTextEx(GetFontDefault(), "RESUME", FONTSIZE, 2).y};
+            Rectangle NGutton2 = {GetScreenWidth() / 2 - MeasureText("NEW GAME", FONTSIZE) / 2, TEXTPOSY + LINEGAPFORTEXT, MeasureText("NEW GAME", FONTSIZE), MeasureTextEx(GetFontDefault(), "NEW GAME", FONTSIZE, 2).y};
+            Rectangle MMbutton = {GetScreenWidth() / 2 - MeasureText("MAIN MENU", FONTSIZE) / 2, TEXTPOSY + 2 * LINEGAPFORTEXT, MeasureText("MAIN MENU", FONTSIZE), MeasureTextEx(GetFontDefault(), "MAIN MENU", FONTSIZE, 2).y};
+            Rectangle VLbutton2 = {GetScreenWidth() / 2 - MeasureText(vol_text, FONTSIZE) / 2, TEXTPOSY + 3 * LINEGAPFORTEXT, MeasureText(vol_text, HOVER_FONTSIZE), MeasureTextEx(GetFontDefault(), vol_text, FONTSIZE, 2).y};
+            Rectangle Ebutton2 = {GetScreenWidth() / 2 - MeasureText("EXIT", FONTSIZE) / 2, TEXTPOSY + 4 * LINEGAPFORTEXT, MeasureText("EXIT", FONTSIZE), MeasureTextEx(GetFontDefault(), "EXIT", FONTSIZE, 2).y};
 
-            if (CheckCollisionPointRec(GetMousePosition(), Rbutton)) selected2 = 0;
-            if (CheckCollisionPointRec(GetMousePosition(), NGutton2)) selected2 = 1;
-            if (CheckCollisionPointRec(GetMousePosition(), MMbutton)) selected2 = 2;
-            if (CheckCollisionPointRec(GetMousePosition(), VLbutton2)) selected2 = 3;
-            if (CheckCollisionPointRec(GetMousePosition(), Ebutton2)) selected2 = 4;
+            if (CheckCollisionPointRec(GetMousePosition(), Rbutton))
+                selected2 = 0;
+            if (CheckCollisionPointRec(GetMousePosition(), NGutton2))
+                selected2 = 1;
+            if (CheckCollisionPointRec(GetMousePosition(), MMbutton))
+                selected2 = 2;
+            if (CheckCollisionPointRec(GetMousePosition(), VLbutton2))
+                selected2 = 3;
+            if (CheckCollisionPointRec(GetMousePosition(), Ebutton2))
+                selected2 = 4;
 
-            if (selected2 == 0) DrawText("RESUME", WIDTH / 2 - MeasureText("RESUME", HOVER_FONTSIZE) / 2, TEXTPOSY, HOVER_FONTSIZE, TEXTCOLOR);
-            else DrawText("RESUME", WIDTH / 2 - MeasureText("RESUME", FONTSIZE) / 2, TEXTPOSY, FONTSIZE, TEXTCOLOR);
+            if (selected2 == 0)
+                DrawText("RESUME", WIDTH / 2 - MeasureText("RESUME", HOVER_FONTSIZE) / 2, TEXTPOSY, HOVER_FONTSIZE, TEXTCOLOR);
+            else
+                DrawText("RESUME", WIDTH / 2 - MeasureText("RESUME", FONTSIZE) / 2, TEXTPOSY, FONTSIZE, TEXTCOLOR);
 
-            if (selected2 == 1) DrawText("NEW GAME", WIDTH / 2 - MeasureText("NEW GAME", HOVER_FONTSIZE) / 2, TEXTPOSY + LINEGAPFORTEXT, HOVER_FONTSIZE, TEXTCOLOR);
-            else DrawText("NEW GAME", WIDTH / 2 - MeasureText("NEW GAME", FONTSIZE) / 2, TEXTPOSY + LINEGAPFORTEXT, FONTSIZE, TEXTCOLOR);
+            if (selected2 == 1)
+                DrawText("NEW GAME", WIDTH / 2 - MeasureText("NEW GAME", HOVER_FONTSIZE) / 2, TEXTPOSY + LINEGAPFORTEXT, HOVER_FONTSIZE, TEXTCOLOR);
+            else
+                DrawText("NEW GAME", WIDTH / 2 - MeasureText("NEW GAME", FONTSIZE) / 2, TEXTPOSY + LINEGAPFORTEXT, FONTSIZE, TEXTCOLOR);
 
-            if (selected2 == 2) DrawText("MAIN MENU", WIDTH / 2 - MeasureText("MAIN MENU", HOVER_FONTSIZE) / 2, TEXTPOSY + 2 * LINEGAPFORTEXT, HOVER_FONTSIZE, TEXTCOLOR);
-            else DrawText("MAIN MENU", WIDTH / 2 - MeasureText("MAIN MENU", FONTSIZE) / 2, TEXTPOSY + 2 * LINEGAPFORTEXT, FONTSIZE, TEXTCOLOR);
+            if (selected2 == 2)
+                DrawText("MAIN MENU", WIDTH / 2 - MeasureText("MAIN MENU", HOVER_FONTSIZE) / 2, TEXTPOSY + 2 * LINEGAPFORTEXT, HOVER_FONTSIZE, TEXTCOLOR);
+            else
+                DrawText("MAIN MENU", WIDTH / 2 - MeasureText("MAIN MENU", FONTSIZE) / 2, TEXTPOSY + 2 * LINEGAPFORTEXT, FONTSIZE, TEXTCOLOR);
 
-            if (selected2 == 3) DrawText(vol_text, WIDTH / 2 - MeasureText(vol_text, HOVER_FONTSIZE) / 2, TEXTPOSY + 3 * LINEGAPFORTEXT, HOVER_FONTSIZE, TEXTCOLOR);
-            else DrawText(vol_text, WIDTH / 2 - MeasureText(vol_text, FONTSIZE) / 2, TEXTPOSY + 3 * LINEGAPFORTEXT, FONTSIZE, TEXTCOLOR);
+            if (selected2 == 3)
+                DrawText(vol_text, WIDTH / 2 - MeasureText(vol_text, HOVER_FONTSIZE) / 2, TEXTPOSY + 3 * LINEGAPFORTEXT, HOVER_FONTSIZE, TEXTCOLOR);
+            else
+                DrawText(vol_text, WIDTH / 2 - MeasureText(vol_text, FONTSIZE) / 2, TEXTPOSY + 3 * LINEGAPFORTEXT, FONTSIZE, TEXTCOLOR);
 
-            if (selected2 == 4) DrawText("EXIT", WIDTH / 2 - MeasureText("EXIT", HOVER_FONTSIZE) / 2, TEXTPOSY + 4 * LINEGAPFORTEXT, HOVER_FONTSIZE, TEXTCOLOR);
-            else DrawText("EXIT", WIDTH / 2 - MeasureText("EXIT", FONTSIZE) / 2, TEXTPOSY + 4 * LINEGAPFORTEXT, FONTSIZE, TEXTCOLOR);
+            if (selected2 == 4)
+                DrawText("EXIT", WIDTH / 2 - MeasureText("EXIT", HOVER_FONTSIZE) / 2, TEXTPOSY + 4 * LINEGAPFORTEXT, HOVER_FONTSIZE, TEXTCOLOR);
+            else
+                DrawText("EXIT", WIDTH / 2 - MeasureText("EXIT", FONTSIZE) / 2, TEXTPOSY + 4 * LINEGAPFORTEXT, FONTSIZE, TEXTCOLOR);
 
             if (IsKeyPressed(KEY_UP) && selected2 > 0)
                 selected2--;
             if (IsKeyPressed(KEY_DOWN) && selected2 < 4)
                 selected2++;
 
-            if (IsKeyPressed(KEY_ENTER)||IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
+            if (IsKeyPressed(KEY_ENTER) || IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
             {
                 if (selected2 == 0)
                     pageIndex = 3;
-                else if (selected2 == 1) pageIndex = 6;
-                else if (selected2 == 2) pageIndex = 0;
+                else if (selected2 == 1)
+                    pageIndex = 6;
+                else if (selected2 == 2)
+                    pageIndex = 0;
                 else if (selected2 == 3)
                 {
                     if (vol == 0)
@@ -624,10 +673,27 @@ int main(void)
                 pageIndex = 0;
             }
 
-            DrawRectangle(10, 10, WIDTH - 10, HEIGHT - 10, Fade(BLACK, 0.7f));
+            DrawRectangle(0, 0, WIDTH, HEIGHT, Fade(BLACK, 0.7f));
             DrawText(backHint, (WIDTH - MeasureText(backHint, FONTSIZE / 2)) / 2, HEIGHT - 35, FONTSIZE / 2, HINTTEXTCOLOR);
-            DrawText("ABOUT", GetScreenWidth() / 2 - MeasureText("ABOUT", HOVER_FONTSIZE) / 2, 60, HOVER_FONTSIZE, TEXTCOLOR);
-            DrawText("DEVELOPERS: MD. FOISAL & SHAHARIAR SAJID SWAPNO", 10, TEXTPOSY + LINEGAPFORTEXT * 0.5, 25, TEXTCOLOR);
+            DrawText("HOW TO PLAY", GetScreenWidth() / 2 - MeasureText("HOW TO PLAY", FONTSIZE) / 2, 10, FONTSIZE, TEXTCOLOR);
+
+            DrawText("GAMEPLAY:", 10,TEXTPOSY/4, FONTSIZE/1.25, GOLD);   
+            DrawText("Match 3 or more balls of the same to", 15+MeasureText("GAMEPLAY:",FONTSIZE/1.25),TEXTPOSY/4, FONTSIZE/1.25, TEXTCOLOR);
+            DrawText("pop them.Clear all balls from the grid to win the", 10,TEXTPOSY/4+LINEGAPFORTEXT/1.5, FONTSIZE/1.25, TEXTCOLOR);
+            DrawText("level.", 10,TEXTPOSY/4+2*LINEGAPFORTEXT/1.5, FONTSIZE/1.25, TEXTCOLOR);
+            
+            DrawText("SPECIAL TIME BALLS:", 10,TEXTPOSY/4+3*LINEGAPFORTEXT/1.5, FONTSIZE/1.25, GOLD);   
+            DrawText("Black Ball: 05sec Penalty", 15+MeasureText("SPECIAL TIME BALLS:",FONTSIZE/1.25),TEXTPOSY/4+3*LINEGAPFORTEXT/1.5, FONTSIZE/1.25, TEXTCOLOR);
+            DrawText("RED Ball: 05sec Bonus", 15+MeasureText("SPECIAL TIME BALLS:",FONTSIZE/1.25),TEXTPOSY/4+4*LINEGAPFORTEXT/1.5, FONTSIZE/1.25, TEXTCOLOR);
+            
+            DrawText("CONTROLS:", 10,TEXTPOSY/4+5*LINEGAPFORTEXT/1.5, FONTSIZE/1.25, GOLD);
+            DrawText("Aim Cannon: Move Mouse", 15+MeasureText("CONTROLS:",FONTSIZE/1.25),TEXTPOSY/4+5*LINEGAPFORTEXT/1.5, FONTSIZE/1.25, TEXTCOLOR);
+            DrawText("Fire Ball: SPACE / Left Mouse Click", 15+MeasureText("CONTROLS:",FONTSIZE/1.25),TEXTPOSY/4+6*LINEGAPFORTEXT/1.5, FONTSIZE/1.25, TEXTCOLOR);
+            DrawText("Pause Game: P Key", 15+MeasureText("CONTROLS:",FONTSIZE/1.25),TEXTPOSY/4+7*LINEGAPFORTEXT/1.5, FONTSIZE/1.25, TEXTCOLOR);
+
+            DrawText("GAME OVER:", 10,TEXTPOSY/4+8*LINEGAPFORTEXT/1.5, FONTSIZE/1.25, GOLD);
+            DrawText("Timer hits 0 OR balls cross the", 15+MeasureText("GAME OVER:",FONTSIZE/1.25),TEXTPOSY/4+8*LINEGAPFORTEXT/1.5, FONTSIZE/1.25, TEXTCOLOR);
+            DrawText("lower danger line.", 10,TEXTPOSY/4+9*LINEGAPFORTEXT/1.5, FONTSIZE/1.25, TEXTCOLOR);
             break;
 
         case 3: // GamePlay
@@ -661,7 +727,8 @@ int main(void)
                 StopMusicStream(countDown);
                 PlayMusicStream(countDown);
             }
-            if (timeRemaining <= 10) UpdateMusicStream(countDown);
+            if (timeRemaining <= 10)
+                UpdateMusicStream(countDown);
 
             timeRemaining -= GetFrameTime();
             timePassed += GetFrameTime();
@@ -677,7 +744,8 @@ int main(void)
                     PlaySound(gameover);
                     GameOver(false);
                 }
-                else{
+                else
+                {
                     PlaySound(winSound);
                     GameOver(true);
                 }
@@ -803,13 +871,14 @@ int main(void)
                                 shootedCenter,
                                 BALLRADIUS - 8,
                                 existedCenter,
-                                BALLRADIUS) && falling[i] != true)
+                                BALLRADIUS) &&
+                            falling[i] != true)
                         {
                             isCollision = true;
 
                             if (randBallIdx[i] == 4)
                             {
-                                timeRemaining -= 10;
+                                timeRemaining -= 5;
                                 PlaySound(lostTime);
                                 existedBalls[i] = (Rectangle){0, 0, 0, 0};
                                 removedBalls++;
@@ -824,7 +893,7 @@ int main(void)
                             }
                             else if (randBallIdx[i] == 3)
                             {
-                                timeRemaining += 10;
+                                timeRemaining += 5;
                                 PlaySound(bonus);
                                 existedBalls[i] = (Rectangle){0, 0, 0, 0};
                                 removedBalls++;
@@ -951,24 +1020,33 @@ int main(void)
             sprintf(timeText, "TIME: %.0f SEC", timePassed);
             DrawText(timeText, WIDTH / 2 - MeasureText(timeText, FONTSIZE) / 2, TEXTPOSY + LINEGAPFORTEXT, FONTSIZE, TEXTCOLOR);
 
-            Rectangle NGbutton2 = {135 - MeasureText("NEW GAME", FONTSIZE / 1.5) / 2, TEXTPOSY + 2 * LINEGAPFORTEXT, MeasureText("NEW GAME", FONTSIZE/1.5), MeasureTextEx(GetFontDefault(),"NEW GAME",FONTSIZE/1.5,2).y};
-            Rectangle LDbutton2 = {WIDTH / 2 - MeasureText("LEADERBOARD", FONTSIZE / 1.5) / 2, TEXTPOSY + 2 * LINEGAPFORTEXT, MeasureText("LEADERBOARD", FONTSIZE/1.5), MeasureTextEx(GetFontDefault(),"LEADERBOARD",FONTSIZE/1.5,2).y};
-            Rectangle Ebutton3 = {650 - MeasureText("EXIT", FONTSIZE / 1.5) / 2, TEXTPOSY + 2 * LINEGAPFORTEXT, MeasureText("EXIT", FONTSIZE/1.5), MeasureTextEx(GetFontDefault(),"EXIT",FONTSIZE/1.5,2).y};
+            Rectangle NGbutton2 = {135 - MeasureText("NEW GAME", FONTSIZE / 1.5) / 2, TEXTPOSY + 2 * LINEGAPFORTEXT, MeasureText("NEW GAME", FONTSIZE / 1.5), MeasureTextEx(GetFontDefault(), "NEW GAME", FONTSIZE / 1.5, 2).y};
+            Rectangle LDbutton2 = {WIDTH / 2 - MeasureText("LEADERBOARD", FONTSIZE / 1.5) / 2, TEXTPOSY + 2 * LINEGAPFORTEXT, MeasureText("LEADERBOARD", FONTSIZE / 1.5), MeasureTextEx(GetFontDefault(), "LEADERBOARD", FONTSIZE / 1.5, 2).y};
+            Rectangle Ebutton3 = {650 - MeasureText("EXIT", FONTSIZE / 1.5) / 2, TEXTPOSY + 2 * LINEGAPFORTEXT, MeasureText("EXIT", FONTSIZE / 1.5), MeasureTextEx(GetFontDefault(), "EXIT", FONTSIZE / 1.5, 2).y};
 
-            if (CheckCollisionPointRec(GetMousePosition(), NGbutton2)) selected = 0;
+            if (CheckCollisionPointRec(GetMousePosition(), NGbutton2))
+                selected = 0;
 
-            if (CheckCollisionPointRec(GetMousePosition(), LDbutton2)) selected = 1;
+            if (CheckCollisionPointRec(GetMousePosition(), LDbutton2))
+                selected = 1;
 
-            if (CheckCollisionPointRec(GetMousePosition(), Ebutton3)) selected = 2;
+            if (CheckCollisionPointRec(GetMousePosition(), Ebutton3))
+                selected = 2;
 
-            if (selected == 0) DrawText("NEW GAME", 135 - MeasureText("NEW GAME", HOVER_FONTSIZE / 1.5) / 2, TEXTPOSY + 2 * LINEGAPFORTEXT, HOVER_FONTSIZE / 1.5, TEXTCOLOR);
-            else DrawText("NEW GAME", 135 - MeasureText("NEW GAME", FONTSIZE / 1.5) / 2, TEXTPOSY + 2 * LINEGAPFORTEXT, FONTSIZE / 1.5, TEXTCOLOR);
+            if (selected == 0)
+                DrawText("NEW GAME", 135 - MeasureText("NEW GAME", HOVER_FONTSIZE / 1.5) / 2, TEXTPOSY + 2 * LINEGAPFORTEXT, HOVER_FONTSIZE / 1.5, TEXTCOLOR);
+            else
+                DrawText("NEW GAME", 135 - MeasureText("NEW GAME", FONTSIZE / 1.5) / 2, TEXTPOSY + 2 * LINEGAPFORTEXT, FONTSIZE / 1.5, TEXTCOLOR);
 
-            if (selected == 1) DrawText("LEADERBOARD", WIDTH / 2 - MeasureText("LEADERBOARD", HOVER_FONTSIZE / 1.5) / 2, TEXTPOSY + 2 * LINEGAPFORTEXT, HOVER_FONTSIZE / 1.5, TEXTCOLOR);
-            else DrawText("LEADERBOARD", WIDTH / 2 - MeasureText("LEADERBOARD", FONTSIZE / 1.5) / 2, TEXTPOSY + 2 * LINEGAPFORTEXT, FONTSIZE / 1.5, TEXTCOLOR);
+            if (selected == 1)
+                DrawText("LEADERBOARD", WIDTH / 2 - MeasureText("LEADERBOARD", HOVER_FONTSIZE / 1.5) / 2, TEXTPOSY + 2 * LINEGAPFORTEXT, HOVER_FONTSIZE / 1.5, TEXTCOLOR);
+            else
+                DrawText("LEADERBOARD", WIDTH / 2 - MeasureText("LEADERBOARD", FONTSIZE / 1.5) / 2, TEXTPOSY + 2 * LINEGAPFORTEXT, FONTSIZE / 1.5, TEXTCOLOR);
 
-            if (selected == 2) DrawText("EXIT", 650 - MeasureText("EXIT", HOVER_FONTSIZE / 1.5) / 2, TEXTPOSY + 2 * LINEGAPFORTEXT, HOVER_FONTSIZE / 1.5, TEXTCOLOR);
-            else DrawText("EXIT", 650 - MeasureText("EXIT", FONTSIZE / 1.5) / 2, TEXTPOSY + 2 * LINEGAPFORTEXT, FONTSIZE / 1.5, TEXTCOLOR);
+            if (selected == 2)
+                DrawText("EXIT", 650 - MeasureText("EXIT", HOVER_FONTSIZE / 1.5) / 2, TEXTPOSY + 2 * LINEGAPFORTEXT, HOVER_FONTSIZE / 1.5, TEXTCOLOR);
+            else
+                DrawText("EXIT", 650 - MeasureText("EXIT", FONTSIZE / 1.5) / 2, TEXTPOSY + 2 * LINEGAPFORTEXT, FONTSIZE / 1.5, TEXTCOLOR);
 
             if (IsKeyPressed(KEY_LEFT) && selected > 0)
                 selected--;
@@ -976,7 +1054,7 @@ int main(void)
             if (IsKeyPressed(KEY_RIGHT) && selected < 2)
                 selected++;
 
-            if (IsKeyPressed(KEY_ENTER)||IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
+            if (IsKeyPressed(KEY_ENTER) || IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
             {
                 if (selected == 0)
                 {
@@ -988,7 +1066,9 @@ int main(void)
                     selected = 0;
                     level = 0;
                     pageIndex = 5;
-                }else exit = true;
+                }
+                else
+                    exit = true;
             }
             break;
         case 5: // Leaderboard
@@ -1006,32 +1086,43 @@ int main(void)
                 selected4 = 0;
                 pageIndex = 0;
             }
-            DrawRectangle(10, 10, WIDTH - 20, HEIGHT - 20, Fade(BLACK, 0.7f));
+            DrawRectangle(0, 0, WIDTH, HEIGHT, Fade(BLACK, 0.7f));
             DrawText("LEADERBOARD", GetScreenWidth() / 2 - MeasureText("LEADERBOARD", HOVER_FONTSIZE) / 2, 20, HOVER_FONTSIZE, TEXTCOLOR);
             DrawText(backHint, (WIDTH - MeasureText(backHint, FONTSIZE / 2)) / 2, 0 + HEIGHT - 35, FONTSIZE / 2, HINTTEXTCOLOR);
 
-            Rectangle eb = {GetScreenWidth() / 4 - MeasureText("EASY", FONTSIZE/1.5) / 2, 90, MeasureText("EASY", FONTSIZE/1.5), MeasureTextEx(GetFontDefault(),"EASY",FONTSIZE/1.5,2).y};
-            Rectangle mb = {GetScreenWidth() / 2 - MeasureText("MEDIUM", FONTSIZE/1.5) / 2, 90, MeasureText("MEDIUM", FONTSIZE/1.5), MeasureTextEx(GetFontDefault(),"MEDIUM",FONTSIZE/1.5,2).y};
-            Rectangle hb = {GetScreenWidth() *0.75 - MeasureText("HARD", FONTSIZE/1.5) / 2, 90, MeasureText("HARD", FONTSIZE/1.5), MeasureTextEx(GetFontDefault(),"HARD",FONTSIZE/1.5,2).y};
+            Rectangle eb = {GetScreenWidth() / 4 - MeasureText("EASY", FONTSIZE / 1.5) / 2, 90, MeasureText("EASY", FONTSIZE / 1.5), MeasureTextEx(GetFontDefault(), "EASY", FONTSIZE / 1.5, 2).y};
+            Rectangle mb = {GetScreenWidth() / 2 - MeasureText("MEDIUM", FONTSIZE / 1.5) / 2, 90, MeasureText("MEDIUM", FONTSIZE / 1.5), MeasureTextEx(GetFontDefault(), "MEDIUM", FONTSIZE / 1.5, 2).y};
+            Rectangle hb = {GetScreenWidth() * 0.75 - MeasureText("HARD", FONTSIZE / 1.5) / 2, 90, MeasureText("HARD", FONTSIZE / 1.5), MeasureTextEx(GetFontDefault(), "HARD", FONTSIZE / 1.5, 2).y};
 
-            if(CheckCollisionPointRec(GetMousePosition(),eb)) selected4 = 0,level = selected4;
-            if(CheckCollisionPointRec(GetMousePosition(),mb)) selected4 = 1,level = selected4;
-            if(CheckCollisionPointRec(GetMousePosition(),hb)) selected4 = 2,level = selected4;
+            if (CheckCollisionPointRec(GetMousePosition(), eb))
+                selected4 = 0, level = selected4;
+            if (CheckCollisionPointRec(GetMousePosition(), mb))
+                selected4 = 1, level = selected4;
+            if (CheckCollisionPointRec(GetMousePosition(), hb))
+                selected4 = 2, level = selected4;
 
-            if(selected4==0) DrawText("EASY", GetScreenWidth() / 4 - MeasureText("EASY", FONTSIZE) / 2, 90, FONTSIZE, TEXTCOLOR);
-            else DrawText("EASY", GetScreenWidth() / 4 - MeasureText("EASY", FONTSIZE/1.5) / 2, 90, FONTSIZE/1.5, TEXTCOLOR);
+            if (selected4 == 0)
+                DrawText("EASY", GetScreenWidth() / 4 - MeasureText("EASY", FONTSIZE) / 2, 90, FONTSIZE, TEXTCOLOR);
+            else
+                DrawText("EASY", GetScreenWidth() / 4 - MeasureText("EASY", FONTSIZE / 1.5) / 2, 90, FONTSIZE / 1.5, TEXTCOLOR);
 
-            if(selected4==1) DrawText("MEDIUM", GetScreenWidth() / 2 - MeasureText("MEDIUM", FONTSIZE) / 2, 90, FONTSIZE, TEXTCOLOR);
-            else DrawText("MEDIUM", GetScreenWidth() / 2 - MeasureText("MEDIUM", FONTSIZE/1.5) / 2, 90, FONTSIZE/1.5, TEXTCOLOR);
+            if (selected4 == 1)
+                DrawText("MEDIUM", GetScreenWidth() / 2 - MeasureText("MEDIUM", FONTSIZE) / 2, 90, FONTSIZE, TEXTCOLOR);
+            else
+                DrawText("MEDIUM", GetScreenWidth() / 2 - MeasureText("MEDIUM", FONTSIZE / 1.5) / 2, 90, FONTSIZE / 1.5, TEXTCOLOR);
 
-            if(selected4==2) DrawText("HARD", GetScreenWidth() *0.75 - MeasureText("HARD", FONTSIZE) / 2, 90, FONTSIZE, TEXTCOLOR);
-            else DrawText("HARD", GetScreenWidth() *0.75 - MeasureText("HARD", FONTSIZE/1.5) / 2, 90, FONTSIZE/1.5, TEXTCOLOR);
+            if (selected4 == 2)
+                DrawText("HARD", GetScreenWidth() * 0.75 - MeasureText("HARD", FONTSIZE) / 2, 90, FONTSIZE, TEXTCOLOR);
+            else
+                DrawText("HARD", GetScreenWidth() * 0.75 - MeasureText("HARD", FONTSIZE / 1.5) / 2, 90, FONTSIZE / 1.5, TEXTCOLOR);
 
-            if(IsKeyPressed(KEY_LEFT) && selected4 > 0){
+            if (IsKeyPressed(KEY_LEFT) && selected4 > 0)
+            {
                 selected4--;
                 level = selected4;
             }
-            if(IsKeyPressed(KEY_RIGHT) && selected4 < 2){
+            if (IsKeyPressed(KEY_RIGHT) && selected4 < 2)
+            {
                 selected4++;
                 level = selected4;
             }
@@ -1054,37 +1145,77 @@ int main(void)
             }
             SetMusicVolume(*bgm, vol);
 
-            Rectangle easyButton = {GetScreenWidth() / 2 - MeasureText("EASY", FONTSIZE) / 2, TEXTPOSY, MeasureText("EASY", FONTSIZE), MeasureTextEx(GetFontDefault(),"EASY",FONTSIZE,2).y};
-            Rectangle mediumButton = {GetScreenWidth() / 2 - MeasureText("MEDIUM", FONTSIZE) / 2, TEXTPOSY + LINEGAPFORTEXT, MeasureText("MEDIUM", FONTSIZE), MeasureTextEx(GetFontDefault(),"MEDIUM",FONTSIZE,2).y};
-            Rectangle hardButton = {GetScreenWidth() / 2 - MeasureText("HARD", FONTSIZE) / 2, TEXTPOSY + 2 * LINEGAPFORTEXT, MeasureText("HARD", FONTSIZE), MeasureTextEx(GetFontDefault(),"HARD",FONTSIZE,2).y};
+            Rectangle easyButton = {GetScreenWidth() / 2 - MeasureText("EASY", FONTSIZE) / 2, TEXTPOSY, MeasureText("EASY", FONTSIZE), MeasureTextEx(GetFontDefault(), "EASY", FONTSIZE, 2).y};
+            Rectangle mediumButton = {GetScreenWidth() / 2 - MeasureText("MEDIUM", FONTSIZE) / 2, TEXTPOSY + LINEGAPFORTEXT, MeasureText("MEDIUM", FONTSIZE), MeasureTextEx(GetFontDefault(), "MEDIUM", FONTSIZE, 2).y};
+            Rectangle hardButton = {GetScreenWidth() / 2 - MeasureText("HARD", FONTSIZE) / 2, TEXTPOSY + 2 * LINEGAPFORTEXT, MeasureText("HARD", FONTSIZE), MeasureTextEx(GetFontDefault(), "HARD", FONTSIZE, 2).y};
 
-            if (CheckCollisionPointRec(GetMousePosition(), easyButton)) selected3 = 0;
+            if (CheckCollisionPointRec(GetMousePosition(), easyButton))
+                selected3 = 0;
 
-            if (CheckCollisionPointRec(GetMousePosition(), mediumButton)) selected3 = 1;
+            if (CheckCollisionPointRec(GetMousePosition(), mediumButton))
+                selected3 = 1;
 
-            if (CheckCollisionPointRec(GetMousePosition(), hardButton)) selected3 = 2;
+            if (CheckCollisionPointRec(GetMousePosition(), hardButton))
+                selected3 = 2;
 
-            if (selected3 == 0) DrawText("EASY", WIDTH / 2 - MeasureText("EASY", HOVER_FONTSIZE) / 2, TEXTPOSY, HOVER_FONTSIZE, TEXTCOLOR);
-            else DrawText("EASY", WIDTH / 2 - MeasureText("EASY", FONTSIZE) / 2, TEXTPOSY, FONTSIZE, TEXTCOLOR);
+            if (selected3 == 0)
+                DrawText("EASY", WIDTH / 2 - MeasureText("EASY", HOVER_FONTSIZE) / 2, TEXTPOSY, HOVER_FONTSIZE, TEXTCOLOR);
+            else
+                DrawText("EASY", WIDTH / 2 - MeasureText("EASY", FONTSIZE) / 2, TEXTPOSY, FONTSIZE, TEXTCOLOR);
 
-            if (selected3 == 1) DrawText("MEDIUM", WIDTH / 2 - MeasureText("MEDIUM", HOVER_FONTSIZE) / 2, TEXTPOSY + LINEGAPFORTEXT, HOVER_FONTSIZE, TEXTCOLOR);
-            else DrawText("MEDIUM", WIDTH / 2 - MeasureText("MEDIUM", FONTSIZE) / 2, TEXTPOSY + LINEGAPFORTEXT, FONTSIZE, TEXTCOLOR);
+            if (selected3 == 1)
+                DrawText("MEDIUM", WIDTH / 2 - MeasureText("MEDIUM", HOVER_FONTSIZE) / 2, TEXTPOSY + LINEGAPFORTEXT, HOVER_FONTSIZE, TEXTCOLOR);
+            else
+                DrawText("MEDIUM", WIDTH / 2 - MeasureText("MEDIUM", FONTSIZE) / 2, TEXTPOSY + LINEGAPFORTEXT, FONTSIZE, TEXTCOLOR);
 
-            if (selected3 == 2) DrawText("HARD", WIDTH / 2 - MeasureText("HARD", HOVER_FONTSIZE) / 2, TEXTPOSY + 2 * LINEGAPFORTEXT, HOVER_FONTSIZE, TEXTCOLOR);
-            else DrawText("HARD", WIDTH / 2 - MeasureText("HARD", FONTSIZE) / 2, TEXTPOSY + 2 * LINEGAPFORTEXT, FONTSIZE, TEXTCOLOR);
+            if (selected3 == 2)
+                DrawText("HARD", WIDTH / 2 - MeasureText("HARD", HOVER_FONTSIZE) / 2, TEXTPOSY + 2 * LINEGAPFORTEXT, HOVER_FONTSIZE, TEXTCOLOR);
+            else
+                DrawText("HARD", WIDTH / 2 - MeasureText("HARD", FONTSIZE) / 2, TEXTPOSY + 2 * LINEGAPFORTEXT, FONTSIZE, TEXTCOLOR);
 
-            if (IsKeyPressed(KEY_UP) && selected3 > 0) selected3--;
-            if (IsKeyPressed(KEY_DOWN) && selected3 < 2) selected3++;
+            if (IsKeyPressed(KEY_UP) && selected3 > 0)
+                selected3--;
+            if (IsKeyPressed(KEY_DOWN) && selected3 < 2)
+                selected3++;
 
-            if (IsKeyPressed(KEY_ENTER)||IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
+            if (IsKeyPressed(KEY_ENTER) || IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
             {
-                if (selected3 == 0) level = 0;
-                else if (selected3 == 1) level = 1;                    
-                else level = 2;
+                if (selected3 == 0)
+                    level = 0;
+                else if (selected3 == 1)
+                    level = 1;
+                else
+                    level = 2;
                 selected3 = 0;
                 NewGame();
                 pageIndex = 3;
             }
+            break;
+        case 7: // credits
+            if (bgm != &menuBgm)
+            {
+                StopMusicStream(*bgm);
+                bgm = &menuBgm;
+                PlayMusicStream(*bgm);
+            }
+            SetMusicVolume(*bgm, vol);
+            if (IsKeyPressed(KEY_B))
+            {
+                PlaySound(navigate);
+                pageIndex = 0;
+            }
+
+            DrawRectangle(0, 0, WIDTH, HEIGHT, Fade(BLACK, 0.7f));
+            DrawText(backHint, (WIDTH - MeasureText(backHint, FONTSIZE / 2)) / 2, HEIGHT - 35, FONTSIZE / 2, HINTTEXTCOLOR);
+
+            DrawText("CREDITS", WIDTH / 2 - MeasureText("CREDITS", HOVER_FONTSIZE) / 2, 40, HOVER_FONTSIZE, RAYWHITE);
+            DrawLine(WIDTH / 2 - MeasureText("CREDITS", HOVER_FONTSIZE) / 2, 90, WIDTH / 2 + MeasureText("CREDITS", HOVER_FONTSIZE) / 2, 90, LIGHTGRAY);
+
+            DrawText("GRAPHICS & ART", WIDTH / 2 - MeasureText("GRAPHICS & ART", FONTSIZE) / 2, TEXTPOSY / 2, FONTSIZE, GOLD);
+            DrawText("Background,Ball, Cannon: Kenney.nl ,OpenGameArt.org", WIDTH / 2 - MeasureText("Background,Ball, Cannon: Kenney.nl ,OpenGameArt.org", FONTSIZE * 0.65) / 2, TEXTPOSY / 2 + LINEGAPFORTEXT, FONTSIZE * 0.65, WHITE);
+            DrawText("AUDIO & MUSIC", WIDTH / 2 - MeasureText("AUDIO & MUSIC", FONTSIZE) / 2, TEXTPOSY / 2 + 2 * LINEGAPFORTEXT, FONTSIZE, GOLD);
+            DrawText("Sound Effects (SFX): OpenGameArt.org, Mixkit.co, Pixabay.com", WIDTH / 2 - MeasureText("Sound Effects (SFX): OpenGameArt.org, Mixkit.co, Pixabay.com", FONTSIZE * 0.65) / 2, TEXTPOSY / 2 + 3 * LINEGAPFORTEXT, FONTSIZE * 0.65, WHITE);
+            DrawText("Background Music: OpenGameArt.org, Mixkit.co, Pixabay.com", WIDTH / 2 - MeasureText("Background Music: OpenGameArt.org, Mixkit.co, Pixabay.com", FONTSIZE * 0.65) / 2, TEXTPOSY / 2 + 4 * LINEGAPFORTEXT, FONTSIZE * 0.65, WHITE);
             break;
         }
         EndDrawing();
