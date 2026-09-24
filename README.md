@@ -12,7 +12,7 @@
 
 | Main Menu | Gameplay |
 | :---: | :---: |
-| ![Main Menu](examples/MENU.png) | ![Gameplay](examples/gameplay.png) |
+| ![Main Menu](examples/MENU.png) | ![Leaderboard](examples/leaderboard.png) |
 
 | Pause Screen | Game Over |
 | :---: | :---: |
@@ -20,7 +20,7 @@
 
 | Leaderboard |
 | :---: |
-| ![Leaderboard](examples/leaderboard.png) |
+| ![Gameplay](examples/gameplay.png) |
 
 ---
 
