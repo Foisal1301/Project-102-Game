@@ -5,4 +5,6 @@ a.out
 a.exe
 a
 todo.txt
-highScore.txt
+easyScore.txt
+mediumScore.txt
+hardScore.txt
