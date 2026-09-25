@@ -644,7 +644,7 @@ int main(void)
                 if (selected2 == 0)
                     pageIndex = 3;
                 else if (selected2 == 1)
-                    pageIndex = 6;
+                    pageIndex = 3,NewGame();
                 else if (selected2 == 2)
                     pageIndex = 0;
                 else if (selected2 == 3)
@@ -1059,7 +1059,8 @@ int main(void)
                 if (selected == 0)
                 {
                     selected = 0;
-                    pageIndex = 6;
+                    NewGame();
+                    pageIndex = 3;
                 }
                 else if (selected == 1)
                 {
