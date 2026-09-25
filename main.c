@@ -22,7 +22,7 @@
 #define CANNON_WIDTH 80
 #define VELOCITY_OF_BULLET 20
 #define TIMEREMAINING 75
-#define BGMVOLUME 2
+#define BGMVOLUME 3
 #define ANIMATION_TIME 0.1
 #define g 2.5
 /*
