@@ -374,7 +374,7 @@ int main(void)
     Music menuBgm = LoadMusicStream("assets/sounds/menu.wav");
     Music gameplayResumeBgm = LoadMusicStream("assets/sounds/Gameplay_Resume.mp3");
     Music gameOverBgm = LoadMusicStream("assets/sounds/gameover.mp3");
-    Music countDown = LoadMusicStream("assets/sounds/countdown.wav");
+    Music countDown = LoadMusicStream("assets/sounds/countdown.mp3");
     Music *bgm = &menuBgm;
 
     // Sound effect
@@ -728,7 +728,7 @@ int main(void)
                 PlayMusicStream(countDown);
             }
             if (timeRemaining <= 10)
-                UpdateMusicStream(countDown);
+                UpdateMusicStream(countDown),SetMusicVolume(countDown, 5);;
 
             timeRemaining -= GetFrameTime();
             timePassed += GetFrameTime();
