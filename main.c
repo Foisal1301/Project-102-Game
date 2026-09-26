@@ -26,7 +26,7 @@
 #define ANIMATION_TIME 0.1
 #define g 2.5
 /*
-Pages
+============Pages===============
 0 => Start
 1 => Resume
 2 => HOWTOPLAY
