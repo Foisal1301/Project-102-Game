@@ -1,3 +1,14 @@
+/*
+============Pages===============
+0 => Start
+1 => Resume
+2 => HOWTOPLAY
+3 => GamePlay
+4 => GameOver
+5 => LeaderBoard
+6 => Level
+7 => credit
+*/
 #include "raylib.h"
 #include "raymath.h"
 #include <stdio.h>
@@ -16,7 +27,7 @@
 #define TEXTPOSY 200
 #define BALLROWS 16
 #define BALLCOLS 14
-#define BALLNUM 3
+#define BALLNUM 3 // koita color er ball ase
 #define BALLRADIUS ((WIDTH - 12) / (2 * BALLCOLS + 0.5))
 #define CANNON_HEIGHT 120
 #define CANNON_WIDTH 80
@@ -25,22 +36,13 @@
 #define BGMVOLUME 3
 #define ANIMATION_TIME 0.1
 #define g 2.5
-/*
-============Pages===============
-0 => Start
-1 => Resume
-2 => HOWTOPLAY
-3 => GamePlay
-4 => GameOver
-5 => LeaderBoard
-6 => Level
-7 => credit
-*/
+
 Rectangle existedBalls[BALLROWS * BALLCOLS];
 int randBallIdx[BALLROWS * BALLCOLS];
 int downFallVelocity[BALLROWS * BALLCOLS] = {0}; // Dropping ball feature
 bool falling[BALLROWS * BALLCOLS] = {false};     // Dropping ball feature
 int ballXadd = 0, ballYadd = 0;
+
 int ballIndex = 0;
 int removedBalls = 0;
 int initialBallRows = 5;
@@ -52,7 +54,7 @@ float blastAnimation;
 bool shooted;
 int high_scores[3][5];
 char gameOverReason[80];
-bool changeColor = false;
+bool changeColor = false; // color change er agei bullet color change howa bug er fix
 int level = 0;
 
 void loadHighScore(int lvl)
