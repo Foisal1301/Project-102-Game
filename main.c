@@ -8,6 +8,10 @@
 5 => LeaderBoard
 6 => Level
 7 => credit
+===========level================
+0 => EASY
+1 => MEDIUM
+2 => HARD
 */
 #include "raylib.h"
 #include "raymath.h"
@@ -395,9 +399,9 @@ int main(void)
     SetTargetFPS(60);
 
     // score
-    // easy
     for (int i = 0; i <= 2; i++)
         loadHighScore(i);
+
     // Global
     Texture2D bg = LoadTexture("assets/bg.png");
     Texture2D logo = LoadTexture("assets/logo.png");
@@ -434,7 +438,7 @@ int main(void)
     balls[BALLNUM + 1] = LoadTexture("assets/ball_t-.png");
 
     // Shooter
-    Vector2 cannonBase = {WIDTH / 2.0f, HEIGHT * 0.95f};
+    Vector2 cannonBase = {WIDTH / 2.0, HEIGHT * 0.95};
     Vector2 cannonOrigin = {CANNON_WIDTH / 2, CANNON_HEIGHT};
     float cannonAngle = 0;
     Texture2D shooters[BALLNUM];
@@ -734,7 +738,7 @@ int main(void)
 
             timeRemaining -= GetFrameTime();
             timePassed += GetFrameTime();
-            DrawRectangle(0, 0, WIDTH, HEIGHT, Fade(BLACK, 0.3f));
+            DrawRectangle(0, 0, WIDTH, HEIGHT, Fade(BLACK, 0.3));
             DrawText(Resumehint, (WIDTH - MeasureText(Resumehint, FONTSIZE / 2)) / 2, HEIGHT - 20, FONTSIZE / 2, HINTTEXTCOLOR);
             if (removedBalls >= ballIndex || timeRemaining < 0)
             { // GameOver
@@ -757,7 +761,7 @@ int main(void)
                 PlaySound(navigate);
                 pageIndex = 1;
             }
-            // drawing ball images //Swapno
+            // drawing ball images
 
             for (int i = 0; i < BALLROWS * BALLCOLS; i++)
             {
@@ -780,11 +784,7 @@ int main(void)
                 DrawTexturePro(
                     shooters[shooterIndex],
                     (Rectangle){0, 0, shooters[shooterIndex].width, shooters[shooterIndex].height},
-                    (Rectangle){
-                        cannonBase.x, // cannonPos.x+50,//WIDTH / 2 - 40,
-                        cannonBase.y, // cannonPos.y+100,//HEIGHT - 130,
-                        CANNON_WIDTH,
-                        CANNON_HEIGHT},
+                    (Rectangle){cannonBase.x,cannonBase.y, CANNON_WIDTH,CANNON_HEIGHT},
                     cannonOrigin, cannonAngle + 90, WHITE);
             else
             {
@@ -792,9 +792,7 @@ int main(void)
                     blastShooters[shooterIndex],
                     (Rectangle){0, 0, blastShooters[shooterIndex].width, blastShooters[shooterIndex].height},
                     (Rectangle){cannonBase.x, cannonBase.y, CANNON_WIDTH, CANNON_HEIGHT},
-                    cannonOrigin, //(Vector2){CANNON_WIDTH / 2.0, 0},
-                    cannonAngle + 90,
-                    WHITE);
+                    cannonOrigin,cannonAngle + 90,WHITE);
                 blastAnimation -= GetFrameTime();
             }
             if (IsKeyPressed(KEY_SPACE) || IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
@@ -809,8 +807,6 @@ int main(void)
 
                     bulletVelocity.x = VELOCITY_OF_BULLET * cos(cannonAngle * DEG2RAD);
                     bulletVelocity.y = VELOCITY_OF_BULLET * sin(cannonAngle * DEG2RAD);
-                    if (bulletVelocity.y > 0)
-                        bulletVelocity.y = -bulletVelocity.y;
                 }
             }
             bool isCollision = false;
@@ -836,10 +832,7 @@ int main(void)
                         int c = targetIdx % BALLCOLS;
                         float xAdd = (r % 2 == 0) ? BALLRADIUS : 0;
 
-                        existedBalls[targetIdx] = (Rectangle){
-                            c * BALLRADIUS * 2 + xAdd,
-                            r * (BALLRADIUS * 1.735),
-                            BALLRADIUS * 2, BALLRADIUS * 2};
+                        existedBalls[targetIdx] = (Rectangle){c * BALLRADIUS * 2 + xAdd,r * (BALLRADIUS * 1.735),BALLRADIUS * 2, BALLRADIUS * 2};
                         randBallIdx[targetIdx] = shooterIndex;
                         ballIndex++;
 
@@ -1089,7 +1082,7 @@ int main(void)
                 selected4 = 0;
                 pageIndex = 0;
             }
-            DrawRectangle(0, 0, WIDTH, HEIGHT, Fade(BLACK, 0.7f));
+            DrawRectangle(0, 0, WIDTH, HEIGHT, Fade(BLACK, 0.7));
             DrawText("LEADERBOARD", GetScreenWidth() / 2 - MeasureText("LEADERBOARD", HOVER_FONTSIZE) / 2, 20, HOVER_FONTSIZE, TEXTCOLOR);
             DrawText(backHint, (WIDTH - MeasureText(backHint, FONTSIZE / 2)) / 2, 0 + HEIGHT - 35, FONTSIZE / 2, HINTTEXTCOLOR);
 
@@ -1208,7 +1201,7 @@ int main(void)
                 pageIndex = 0;
             }
 
-            DrawRectangle(0, 0, WIDTH, HEIGHT, Fade(BLACK, 0.7f));
+            DrawRectangle(0, 0, WIDTH, HEIGHT, Fade(BLACK, 0.7));
             DrawText(backHint, (WIDTH - MeasureText(backHint, FONTSIZE / 2)) / 2, HEIGHT - 35, FONTSIZE / 2, HINTTEXTCOLOR);
 
             DrawText("CREDITS", WIDTH / 2 - MeasureText("CREDITS", HOVER_FONTSIZE) / 2, 40, HOVER_FONTSIZE, RAYWHITE);
@@ -1224,7 +1217,7 @@ int main(void)
         EndDrawing();
     }
 
-    // Unload all images
+    // Unload image
     UnloadTexture(bg);
     UnloadTexture(logo);
     for (int i = 0; i < BALLNUM; i++)
@@ -1236,7 +1229,7 @@ int main(void)
     UnloadTexture(balls[BALLNUM]);
     UnloadTexture(balls[BALLNUM + 1]);
 
-    // Unload Sound and BGM's
+    // Unload Sound BGM
     UnloadMusicStream(menuBgm);
     UnloadMusicStream(gameplayResumeBgm);
     UnloadMusicStream(gameOverBgm);
