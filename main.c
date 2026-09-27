@@ -1212,6 +1212,7 @@ int main(void)
             DrawText("AUDIO & MUSIC", WIDTH / 2 - MeasureText("AUDIO & MUSIC", FONTSIZE) / 2, TEXTPOSY / 2 + 2 * LINEGAPFORTEXT, FONTSIZE, GOLD);
             DrawText("Sound Effects (SFX): OpenGameArt.org, Mixkit.co, Pixabay.com", WIDTH / 2 - MeasureText("Sound Effects (SFX): OpenGameArt.org, Mixkit.co, Pixabay.com", FONTSIZE * 0.65) / 2, TEXTPOSY / 2 + 3 * LINEGAPFORTEXT, FONTSIZE * 0.65, WHITE);
             DrawText("Background Music: OpenGameArt.org, Mixkit.co, Pixabay.com", WIDTH / 2 - MeasureText("Background Music: OpenGameArt.org, Mixkit.co, Pixabay.com", FONTSIZE * 0.65) / 2, TEXTPOSY / 2 + 4 * LINEGAPFORTEXT, FONTSIZE * 0.65, WHITE);
+            DrawText("Developed by Md Foisal & Shahariar Sajid Swapno", WIDTH / 2 - MeasureText("Developed by Md Foisal & Shahariar Sajid Swapno", FONTSIZE * 0.65) / 2, TEXTPOSY / 2 + 7 * LINEGAPFORTEXT, FONTSIZE * 0.65, WHITE);
             break;
         }
         EndDrawing();
