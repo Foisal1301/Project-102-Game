@@ -44,12 +44,12 @@ Clear the entire board of balls by aiming and shooting colored ammunition from y
 2. **Floating Balls:** Any floating balls disconnected below the matched group will automatically drop and vanish.
 3. **Wall Bouncing & Roof Sticking:** Fired balls bounce off the left and right side walls, but stick immediately upon touching the top roof or existing balls.
 4. **Special Timer Balls:**
-   - **Red Timer Ball:** Hitting it rewards **+10 seconds** to your remaining time.
-   - **Black Timer Ball:** Hitting it penalty-deducts **-10 seconds** from your remaining time.
+   - **Red Timer Ball:** Hitting it rewards **+5 seconds** to your remaining time.
+   - **Black Timer Ball:** Hitting it penalty-deducts **-5 seconds** from your remaining time.
 
 ### Game End Conditions
-- **Time Up (Loss):** Running out of time results in a game over (`GAMEOVER! TIME UP!`). Your final score is halved as a penalty (`score = score / 2`).
-- **Line Cross (Loss):** Allowing the balls to stack down and cross the lower danger line results in an instant loss (`GAMEOVER! YOU CROSSED THE LINE!`). Your final score is halved as a penalty (`score = score / 2`).
+- **Time Up (Loss):** Running out of time results in a game over (`GAMEOVER! TIME UP!`). Your final score is halved as a penalty (`score /= 2`).
+- **Line Cross (Loss):** Allowing the balls to stack down and cross the lower danger line results in an instant loss (`GAMEOVER! YOU CROSSED THE LINE!`). Your final score is halved as a penalty (`score /= 2`).
 - **Victory (Win):** Clear all balls from the grid to win! Remaining time is converted into bonus points (`score += timeRemaining * 100`).
 
 ---
@@ -119,8 +119,16 @@ Every gameplay action and event is paired with audio cues and music tracks:
 ### Prerequisites
 Make sure **Raylib** and a **GCC Compiler** are installed on your environment.
 
-### Compilation
-Run the following command in your terminal:
+### Compilation & Execution
 
-```bash
-gcc main.c -o bouncing_ball -lraylib -lGL -lm -lpthread -ldl -lrt -lX11s
+1. **Commad for Windows:**
+   ```bash
+   gcc -g main.c -Iraylib/raylib-6.0_win64_mingw-w64/include raylib/raylib-6.0_win64_mingw-w64/lib/libraylib.a -lopengl32 -lgdi32 -lwinmm -Wl,--defsym,stat64i32=_stat64 -o main.exe && main.exe
+   ```
+2. **Command for Linux:**
+   ```bash
+   gcc -g main.c -Iraylib/raylib-6.0_linux_amd64/include raylib/raylib-6.0_linux_amd64/lib/libraylib.a -lGL -lm -lpthread -ldl -lrt -lX11 -o main && ./main
+   ```
+2. **Running via VS Code (Recommended):**
+
+   Open the project in VS Code, navigate to the ```main.c``` file, and press ```F5``` to start debugging/running the game.
